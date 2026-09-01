@@ -1,3 +1,3 @@
 export default typeof definePageConfig === 'function'
-  ? definePageConfig({ navigationBarTitleText: '医院介绍' })
-  : { navigationBarTitleText: '医院介绍' }
+  ? definePageConfig({ navigationBarTitleText: '医生介绍' })
+  : { navigationBarTitleText: '医生介绍' }

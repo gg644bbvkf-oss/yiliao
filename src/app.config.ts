@@ -16,7 +16,7 @@ export default typeof defineAppConfig === 'function'
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#0D9488',
-      navigationBarTitleText: 'XX镇卫生院',
+      navigationBarTitleText: '旬邑县城关镇卫生院',
       navigationBarTextStyle: 'white'
     },
     tabBar: {
@@ -27,21 +27,21 @@ export default typeof defineAppConfig === 'function'
       list: [
         {
           pagePath: 'pages/index/index',
-          text: '首页',
-          iconPath: './assets/tabbar/home.png',
-          selectedIconPath: './assets/tabbar/home-active.png',
+          text: '医院简介',
+          iconPath: './assets/tabbar/building.png',
+          selectedIconPath: './assets/tabbar/building-active.png',
+        },
+        {
+          pagePath: 'pages/hospital/index',
+          text: '医生介绍',
+          iconPath: './assets/tabbar/stethoscope.png',
+          selectedIconPath: './assets/tabbar/stethoscope-active.png',
         },
         {
           pagePath: 'pages/appointment/index',
           text: '预约挂号',
           iconPath: './assets/tabbar/calendar-plus.png',
           selectedIconPath: './assets/tabbar/calendar-plus-active.png',
-        },
-        {
-          pagePath: 'pages/hospital/index',
-          text: '医院介绍',
-          iconPath: './assets/tabbar/hospital.png',
-          selectedIconPath: './assets/tabbar/hospital-active.png',
         },
         {
           pagePath: 'pages/profile/index',
@@ -69,7 +69,7 @@ export default typeof defineAppConfig === 'function'
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#0D9488',
-      navigationBarTitleText: 'XX镇卫生院',
+      navigationBarTitleText: '旬邑县城关镇卫生院',
       navigationBarTextStyle: 'white'
     },
     tabBar: {
@@ -80,21 +80,21 @@ export default typeof defineAppConfig === 'function'
       list: [
         {
           pagePath: 'pages/index/index',
-          text: '首页',
-          iconPath: './assets/tabbar/home.png',
-          selectedIconPath: './assets/tabbar/home-active.png',
+          text: '医院简介',
+          iconPath: './assets/tabbar/building.png',
+          selectedIconPath: './assets/tabbar/building-active.png',
+        },
+        {
+          pagePath: 'pages/hospital/index',
+          text: '医生介绍',
+          iconPath: './assets/tabbar/stethoscope.png',
+          selectedIconPath: './assets/tabbar/stethoscope-active.png',
         },
         {
           pagePath: 'pages/appointment/index',
           text: '预约挂号',
           iconPath: './assets/tabbar/calendar-plus.png',
           selectedIconPath: './assets/tabbar/calendar-plus-active.png',
-        },
-        {
-          pagePath: 'pages/hospital/index',
-          text: '医院介绍',
-          iconPath: './assets/tabbar/hospital.png',
-          selectedIconPath: './assets/tabbar/hospital-active.png',
         },
         {
           pagePath: 'pages/profile/index',
