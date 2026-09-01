@@ -14,7 +14,12 @@ import {
   ListOrdered,
 } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
-import { departments } from '@/data/mock-data'
+import { departments, doctors } from '@/data/mock-data'
+
+// 只显示有医生的科室
+const departmentsWithDoctors = departments.filter((dept) =>
+  doctors.some((doc) => doc.departmentId === dept.id)
+)
 
 const iconMap: Record<string, React.ComponentType<any>> = {
   Stethoscope,
@@ -65,7 +70,7 @@ const IndexPage = () => {
         </View>
 
         <View className="flex flex-col gap-3">
-          {departments.map((dept) => {
+          {departmentsWithDoctors.map((dept) => {
             const IconComp = iconMap[dept.icon] || Stethoscope
             return (
               <Card
