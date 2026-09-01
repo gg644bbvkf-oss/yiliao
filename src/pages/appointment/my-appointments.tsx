@@ -1,42 +1,91 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { Calendar, Clock, MapPin, User, CircleAlert } from 'lucide-react-taro'
+import { Calendar, Clock, MapPin, User } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  getAppointments,
-  cancelAppointment,
-  getDateDisplay,
-  type Appointment,
-} from '@/data/mock-data'
+import { Network } from '@/network'
+
+interface Appointment {
+  id: string
+  patientName: string
+  patientPhone: string
+  departmentName: string
+  doctorName: string
+  doctorTitle: string
+  date: string
+  timeSlot: string
+  status: 'pending' | 'confirmed' | 'cancelled'
+  createdAt: string
+}
 
 const statusMap: Record<string, { label: string; className: string }> = {
-  pending: { label: '待就诊', className: 'bg-teal-50 text-teal-700 border-0' },
-  completed: { label: '已完成', className: 'bg-slate-100 text-slate-600 border-0' },
+  confirmed: { label: '已预约', className: 'bg-teal-50 text-teal-700 border-0' },
   cancelled: { label: '已取消', className: 'bg-red-50 text-red-500 border-0' },
 }
 
 const MyAppointmentsPage = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>(() => getAppointments())
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const handleCancel = useCallback((aptId: string) => {
-    Taro.showModal({
-      title: '取消预约',
-      content: '确定要取消这个预约吗？取消后号源将被释放。',
-      confirmText: '确定取消',
-      cancelText: '再想想',
-      confirmColor: '#EF4444',
-      success: (res) => {
-        if (res.confirm) {
-          cancelAppointment(aptId)
-          setAppointments(getAppointments())
-          Taro.showToast({ title: '已取消预约', icon: 'success' })
-        }
-      },
-    })
+  const fetchAppointments = useCallback(() => {
+    setLoading(true)
+    Network.request({ url: '/api/appointments' })
+      .then((res: any) => {
+        console.log('获取预约列表:', res.data)
+        setAppointments(res.data?.data?.list || [])
+      })
+      .catch((err) => {
+        console.error('获取预约列表失败:', err)
+      })
+      .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    fetchAppointments()
+  }, [fetchAppointments])
+
+  const handleCancel = useCallback(
+    (aptId: string) => {
+      Taro.showModal({
+        title: '取消预约',
+        content: '确定要取消这个预约吗？',
+        confirmText: '确定取消',
+        cancelText: '再想想',
+        confirmColor: '#EF4444',
+        success: (res) => {
+          if (res.confirm) {
+            Network.request({
+              url: '/api/appointments/cancel',
+              method: 'POST',
+              data: { id: aptId },
+            })
+              .then((cancelRes: any) => {
+                console.log('取消预约响应:', cancelRes.data)
+                if (cancelRes.data?.code === 200) {
+                  fetchAppointments()
+                  Taro.showToast({ title: '已取消预约', icon: 'success' })
+                }
+              })
+              .catch((err) => {
+                console.error('取消预约失败:', err)
+                Taro.showToast({ title: '取消失败', icon: 'none' })
+              })
+          }
+        },
+      })
+    },
+    [fetchAppointments],
+  )
+
+  if (loading) {
+    return (
+      <View className="flex items-center justify-center h-full bg-teal-50">
+        <Text className="text-slate-500 block">加载中...</Text>
+      </View>
+    )
+  }
 
   if (appointments.length === 0) {
     return (
@@ -60,65 +109,61 @@ const MyAppointmentsPage = () => {
       <View className="px-4 pt-4 pb-6">
         <View className="flex flex-col gap-3">
           {appointments.map((apt) => {
-            const statusInfo = statusMap[apt.status] || statusMap.pending
+            const status = statusMap[apt.status] || statusMap.confirmed
             return (
               <Card key={apt.id} className="bg-white rounded-xl shadow-sm">
                 <CardContent className="p-4">
-                  {/* 状态和单号 */}
                   <View className="flex flex-row items-center justify-between mb-3">
-                    <Text className="text-sm text-slate-400 block">
-                      单号：{apt.appointmentNo}
-                    </Text>
-                    <Badge variant="secondary" className={statusInfo.className}>
-                      {statusInfo.label}
+                    <Badge
+                      variant="secondary"
+                      className={status.className + ' text-xs'}
+                    >
+                      {status.label}
                     </Badge>
+                    <Text className="text-xs text-slate-400 block">
+                      {apt.id}
+                    </Text>
                   </View>
 
-                  {/* 科室医生 */}
                   <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
-                      <User size={14} color="#0D9488" />
-                    </View>
+                    <User size={14} color="#0D9488" />
                     <Text className="text-base font-semibold text-slate-800 block">
-                      {apt.departmentName} - {apt.doctorName}（{apt.doctorTitle}）
+                      {apt.patientName}
                     </Text>
                   </View>
 
-                  {/* 时间地点 */}
-                  <View className="flex flex-col gap-2 ml-10">
-                    <View className="flex flex-row items-center gap-2">
-                      <Calendar size={13} color="#94A3B8" />
-                      <Text className="text-sm text-slate-600 block">
-                        {getDateDisplay(apt.date)}
-                      </Text>
-                      <Clock size={13} color="#94A3B8" />
-                      <Text className="text-sm text-slate-600 block">
-                        {apt.period === 'morning' ? '上午' : '下午'}
-                      </Text>
-                    </View>
-                    <View className="flex flex-row items-center gap-2">
-                      <MapPin size={13} color="#94A3B8" />
-                      <Text className="text-sm text-slate-500 block">{apt.location}</Text>
-                    </View>
+                  <View className="flex flex-row items-center gap-2 mb-2">
+                    <Calendar size={14} color="#64748B" />
+                    <Text className="text-sm text-slate-600 block">
+                      {apt.date}
+                    </Text>
+                    <Clock size={14} color="#64748B" className="ml-2" />
+                    <Text className="text-sm text-slate-600 block">
+                      {apt.timeSlot}
+                    </Text>
                   </View>
 
-                  {/* 就诊人 */}
-                  <View className="mt-3 pt-3 border-t border-slate-100">
+                  <View className="flex flex-row items-center gap-2 mb-2">
+                    <User size={14} color="#64748B" />
+                    <Text className="text-sm text-slate-600 block">
+                      {apt.departmentName} · {apt.doctorName} {apt.doctorTitle}
+                    </Text>
+                  </View>
+
+                  <View className="flex flex-row items-center gap-2">
+                    <MapPin size={14} color="#64748B" />
                     <Text className="text-sm text-slate-500 block">
-                      就诊人：{apt.patientName} {apt.patientPhone}
+                      旬邑县城关镇卫生院
                     </Text>
                   </View>
 
-                  {/* 取消按钮 */}
-                  {apt.status === 'pending' && (
-                    <View className="mt-3 flex flex-row justify-end">
+                  {apt.status !== 'cancelled' && (
+                    <View className="mt-3 pt-3 border-t border-slate-100">
                       <Button
                         variant="outline"
-                        size="sm"
-                        className="border-red-200 text-red-500 rounded-lg"
+                        className="w-full h-10 text-sm text-red-500 border-red-200 rounded-lg"
                         onClick={() => handleCancel(apt.id)}
                       >
-                        <CircleAlert size={14} color="#EF4444" />
                         <Text className="text-sm text-red-500 block">取消预约</Text>
                       </Button>
                     </View>

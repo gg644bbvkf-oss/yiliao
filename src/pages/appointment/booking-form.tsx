@@ -6,15 +6,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Network } from '@/network'
 import {
   doctors,
   timeSlots,
   departments,
   getPatients,
-  saveAppointment,
-  generateAppointmentNo,
   getDateDisplay,
-  type Patient,
 } from '@/data/mock-data'
 
 const BookingFormPage = () => {
@@ -43,7 +41,9 @@ const BookingFormPage = () => {
     setPatientIdCard(p.idCard)
   }
 
-  const handleSubmit = () => {
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async () => {
     if (!patientName.trim()) {
       Taro.showToast({ title: '请输入就诊人姓名', icon: 'none' })
       return
@@ -57,43 +57,51 @@ const BookingFormPage = () => {
       return
     }
 
-    const appointmentNo = generateAppointmentNo()
-    saveAppointment({
-      id: `apt-${Date.now()}`,
-      appointmentNo,
-      patientName: patientName.trim(),
-      patientPhone,
-      patientIdCard,
-      departmentId: doctor?.departmentId || '',
-      departmentName: dept?.name || '',
-      doctorId: doctor?.id || '',
-      doctorName: doctor?.name || '',
-      doctorTitle: doctor?.title || '',
-      date: slot?.date || '',
-      period: slot?.period || 'morning',
-      status: 'pending',
-      createTime: new Date().toISOString(),
-      location: dept?.location || '',
-    })
-
-    // 保存就诊人
-    if (selectedPatientIdx < 0) {
-      const newPatient: Patient = {
-        id: `p-${Date.now()}`,
-        name: patientName.trim(),
-        phone: patientPhone,
-        idCard: patientIdCard,
-        relation: '本人',
-        isDefault: savedPatients.length === 0,
+    setSubmitting(true)
+    try {
+      console.log('提交预约:', {
+        patientName: patientName.trim(),
+        patientPhone,
+        patientIdCard,
+        departmentId: doctor?.departmentId || '',
+        departmentName: dept?.name || '',
+        doctorId: doctor?.id || '',
+        doctorName: doctor?.name || '',
+        doctorTitle: doctor?.title || '',
+        date: slot?.date || '',
+        timeSlot: slot?.period === 'morning' ? '上午' : '下午',
+      })
+      const res = await Network.request({
+        url: '/api/appointments',
+        method: 'POST',
+        data: {
+          patientName: patientName.trim(),
+          patientPhone,
+          patientIdCard,
+          departmentId: doctor?.departmentId || '',
+          departmentName: dept?.name || '',
+          doctorId: doctor?.id || '',
+          doctorName: doctor?.name || '',
+          doctorTitle: doctor?.title || '',
+          date: slot?.date || '',
+          timeSlot: slot?.period === 'morning' ? '上午' : '下午',
+        },
+      })
+      console.log('预约响应:', res.data)
+      const appointment = res.data?.data
+      if (appointment) {
+        Taro.redirectTo({
+          url: `/pages/appointment/booking-result?id=${appointment.id}`,
+        })
+      } else {
+        Taro.showToast({ title: '预约失败', icon: 'none' })
       }
-      const list = getPatients()
-      list.push(newPatient)
-      Taro.setStorageSync('patients', list)
+    } catch (err) {
+      console.error('预约失败:', err)
+      Taro.showToast({ title: '网络错误，请重试', icon: 'none' })
+    } finally {
+      setSubmitting(false)
     }
-
-    Taro.redirectTo({
-      url: `/pages/appointment/booking-result?appointmentNo=${appointmentNo}`,
-    })
   }
 
   return (
@@ -232,8 +240,11 @@ const BookingFormPage = () => {
         <Button
           className="w-full h-12 bg-orange-500 text-white text-lg font-semibold rounded-xl active:opacity-90"
           onClick={handleSubmit}
+          disabled={submitting}
         >
-          <Text className="text-lg text-white font-semibold block">确认预约</Text>
+          <Text className="text-lg text-white font-semibold block">
+            {submitting ? '提交中...' : '确认预约'}
+          </Text>
         </Button>
       </View>
     </ScrollView>

@@ -1,19 +1,47 @@
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
 import { CircleCheck, Calendar, Clock, MapPin, User, FileText } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { getAppointments, getDateDisplay } from '@/data/mock-data'
+import { Network } from '@/network'
+
+interface Appointment {
+  id: string
+  patientName: string
+  patientPhone: string
+  departmentName: string
+  doctorName: string
+  doctorTitle: string
+  date: string
+  timeSlot: string
+  status: string
+  createdAt: string
+}
 
 const BookingResultPage = () => {
   const router = useRouter()
-  const appointmentNo = router.params.appointmentNo || ''
+  const appointmentId = router.params.id || ''
+  const [appointment, setAppointment] = useState<Appointment | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const appointment = useMemo(() => {
-    const list = getAppointments()
-    return list.find((a) => a.appointmentNo === appointmentNo)
-  }, [appointmentNo])
+  useEffect(() => {
+    if (!appointmentId) {
+      setLoading(false)
+      return
+    }
+    Network.request({ url: '/api/appointments' })
+      .then((res: any) => {
+        console.log('获取预约列表:', res.data)
+        const list = res.data?.data?.list || []
+        const found = list.find((a: Appointment) => a.id === appointmentId)
+        setAppointment(found || null)
+      })
+      .catch((err) => {
+        console.error('获取预约信息失败:', err)
+      })
+      .finally(() => setLoading(false))
+  }, [appointmentId])
 
   const handleBackHome = () => {
     Taro.switchTab({ url: '/pages/index/index' })
@@ -21,6 +49,14 @@ const BookingResultPage = () => {
 
   const handleViewAppointments = () => {
     Taro.navigateTo({ url: '/pages/appointment/my-appointments' })
+  }
+
+  if (loading) {
+    return (
+      <View className="flex items-center justify-center h-full bg-teal-50">
+        <Text className="text-slate-500 block">加载中...</Text>
+      </View>
+    )
   }
 
   if (!appointment) {
@@ -51,91 +87,106 @@ const BookingResultPage = () => {
 
             <View className="flex flex-col gap-3">
               <View className="flex flex-row items-center gap-3">
-                <View className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
-                  <FileText size={16} color="#0D9488" />
-                </View>
+                <FileText size={16} color="#64748B" />
                 <View className="flex-1">
                   <Text className="text-xs text-slate-400 block">预约单号</Text>
-                  <Text className="text-base font-bold text-orange-500 block mt-1">
-                    {appointment.appointmentNo}
+                  <Text className="text-sm font-semibold text-slate-800 block">
+                    {appointment.id}
                   </Text>
                 </View>
               </View>
 
               <View className="flex flex-row items-center gap-3">
-                <View className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
-                  <User size={16} color="#0D9488" />
-                </View>
+                <User size={16} color="#64748B" />
                 <View className="flex-1">
                   <Text className="text-xs text-slate-400 block">就诊人</Text>
-                  <Text className="text-base text-slate-800 block mt-1">
+                  <Text className="text-sm font-semibold text-slate-800 block">
                     {appointment.patientName}
                   </Text>
                 </View>
               </View>
 
               <View className="flex flex-row items-center gap-3">
-                <View className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
-                  <Calendar size={16} color="#0D9488" />
-                </View>
+                <Calendar size={16} color="#64748B" />
                 <View className="flex-1">
-                  <Text className="text-xs text-slate-400 block">就诊时间</Text>
-                  <Text className="text-base text-slate-800 block mt-1">
-                    {getDateDisplay(appointment.date)}{' '}
-                    {appointment.period === 'morning' ? '上午 8:00-11:30' : '下午 14:00-17:00'}
+                  <Text className="text-xs text-slate-400 block">就诊日期</Text>
+                  <Text className="text-sm font-semibold text-slate-800 block">
+                    {appointment.date}
                   </Text>
                 </View>
               </View>
 
               <View className="flex flex-row items-center gap-3">
-                <View className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
-                  <Clock size={16} color="#0D9488" />
-                </View>
+                <Clock size={16} color="#64748B" />
                 <View className="flex-1">
-                  <Text className="text-xs text-slate-400 block">科室 / 医生</Text>
-                  <Text className="text-base text-slate-800 block mt-1">
-                    {appointment.departmentName} - {appointment.doctorName}（
-                    {appointment.doctorTitle}）
+                  <Text className="text-xs text-slate-400 block">就诊时段</Text>
+                  <Text className="text-sm font-semibold text-slate-800 block">
+                    {appointment.timeSlot}
                   </Text>
                 </View>
               </View>
 
               <View className="flex flex-row items-center gap-3">
-                <View className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
-                  <MapPin size={16} color="#0D9488" />
+                <User size={16} color="#64748B" />
+                <View className="flex-1">
+                  <Text className="text-xs text-slate-400 block">就诊科室</Text>
+                  <Text className="text-sm font-semibold text-slate-800 block">
+                    {appointment.departmentName}
+                  </Text>
                 </View>
+              </View>
+
+              <View className="flex flex-row items-center gap-3">
+                <User size={16} color="#64748B" />
+                <View className="flex-1">
+                  <Text className="text-xs text-slate-400 block">接诊医生</Text>
+                  <Text className="text-sm font-semibold text-slate-800 block">
+                    {appointment.doctorName} {appointment.doctorTitle}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex flex-row items-center gap-3">
+                <MapPin size={16} color="#64748B" />
                 <View className="flex-1">
                   <Text className="text-xs text-slate-400 block">就诊地点</Text>
-                  <Text className="text-base text-slate-800 block mt-1">
-                    {appointment.location}
+                  <Text className="text-sm font-semibold text-slate-800 block">
+                    旬邑县城关镇卫生院 {appointment.departmentName}
                   </Text>
                 </View>
               </View>
-            </View>
-
-            {/* 温馨提示 */}
-            <View className="mt-4 pt-3 border-t border-slate-100">
-              <Text className="text-xs text-slate-400 block leading-relaxed">
-                温馨提示：请携带身份证和医保卡，提前15分钟到院取号。如需取消预约，请提前在「我的预约」中操作。
-              </Text>
             </View>
           </CardContent>
         </Card>
       </View>
 
+      {/* 温馨提示 */}
+      <View className="px-4 mb-6">
+        <Card className="bg-amber-50 rounded-xl border border-amber-200">
+          <CardContent className="p-4">
+            <Text className="text-sm font-semibold text-amber-800 block mb-2">温馨提示</Text>
+            <Text className="text-xs text-amber-700 block">
+              1. 请携带身份证原件按时就诊{'\n'}
+              2. 如需取消预约，请提前在「我的预约」中操作{'\n'}
+              3. 就诊前请准备好医保卡
+            </Text>
+          </CardContent>
+        </Card>
+      </View>
+
       {/* 操作按钮 */}
-      <View className="px-4 pb-6 flex flex-col gap-3">
+      <View className="px-4 pb-8 flex flex-col gap-3">
         <Button
-          className="w-full h-12 bg-teal-600 text-white text-lg font-semibold rounded-xl"
+          className="w-full h-12 bg-teal-600 text-white text-base font-semibold rounded-xl"
           onClick={handleViewAppointments}
         >
-          <Text className="text-lg text-white font-semibold block">查看我的预约</Text>
+          <Text className="text-base text-white font-semibold block">查看我的预约</Text>
         </Button>
         <Button
-          className="w-full h-12 bg-white text-teal-600 border border-teal-200 text-lg font-semibold rounded-xl"
+          className="w-full h-12 bg-white text-teal-600 text-base font-semibold rounded-xl border border-teal-200"
           onClick={handleBackHome}
         >
-          <Text className="text-lg text-teal-600 font-semibold block">返回首页</Text>
+          <Text className="text-base text-teal-600 font-semibold block">返回首页</Text>
         </Button>
       </View>
     </ScrollView>
