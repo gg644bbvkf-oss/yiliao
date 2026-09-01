@@ -15,10 +15,10 @@ import { hospitalInfo } from '@/data/mock-data'
 import './index.css'
 
 const stats = [
-  { label: '建院年份', value: '1958年', icon: Building2 },
-  { label: '职工人数', value: '56人', icon: Users },
-  { label: '高级职称', value: '5人', icon: Award },
-  { label: '年门诊量', value: '8万人次', icon: HeartPulse },
+  { label: '建筑面积', value: '2185㎡', icon: Building2 },
+  { label: '职工人数', value: '18人', icon: Users },
+  { label: '中高级职称', value: '14人', icon: Award },
+  { label: '开设床位', value: '18张', icon: HeartPulse },
 ]
 
 const IndexPage = () => {

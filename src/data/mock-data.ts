@@ -72,27 +72,23 @@ export interface Patient {
 
 // 科室数据
 export const departments: Department[] = [
-  { id: 'd1', name: '内科', description: '常见病、多发病的内科诊治，包括感冒发热、高血压、糖尿病、冠心病等', icon: 'Stethoscope', location: '门诊楼二楼' },
-  { id: 'd2', name: '外科', description: '常见外伤处理、小手术、脓肿切开引流、清创缝合等', icon: 'Scissors', location: '门诊楼二楼' },
-  { id: 'd3', name: '儿科', description: '儿童常见病诊治、预防接种、儿童体检、生长发育评估', icon: 'Baby', location: '门诊楼一楼' },
-  { id: 'd4', name: '中医科', description: '中医内科、针灸推拿、拔罐理疗、中药调理', icon: 'Leaf', location: '门诊楼三楼' },
-  { id: 'd5', name: '全科', description: '常见病首诊、慢性病管理、健康咨询、转诊服务', icon: 'HeartPulse', location: '门诊楼一楼' },
-  { id: 'd6', name: '妇幼保健', description: '孕产妇保健、儿童保健、妇女病普查、产前检查', icon: 'Heart', location: '保健楼一楼' },
-  { id: 'd7', name: '预防接种', description: '国家免疫规划疫苗接种、儿童入托入学查验、成人疫苗接种', icon: 'Syringe', location: '保健楼二楼' },
-  { id: 'd8', name: '口腔科', description: '拔牙、补牙、洗牙、口腔检查、义齿修复', icon: 'Smile', location: '门诊楼一楼' },
+  { id: 'd1', name: '全科门诊', description: '常见病首诊、慢性病管理、健康咨询、转诊服务', icon: 'HeartPulse', location: '门诊楼一层' },
+  { id: 'd2', name: '中医门诊', description: '中医内科诊治、针灸推拿、拔罐刮痧、中药调理', icon: 'Leaf', location: '门诊楼三层' },
+  { id: 'd3', name: '预防接种门诊', description: '国家免疫规划疫苗接种、儿童入托入学查验、成人疫苗接种', icon: 'Syringe', location: '门诊楼一层' },
+  { id: 'd4', name: '中医馆', description: '中医特色诊疗，开展针灸、推拿、拔罐、刮痧、按摩牵引、熏蒸、中医正骨手法复位、小针刀等10类25项中医药适宜技术', icon: 'Flower2', location: '门诊楼三层' },
+  { id: 'd5', name: '康复训练中心', description: '康复理疗、平衡训练、牵引治疗、中医超声治疗、红外线治疗等康复治疗', icon: 'Dumbbell', location: '门诊楼三层' },
+  { id: 'd6', name: '公共卫生科', description: '居民健康档案管理、健康教育、传染病防控、慢性病管理', icon: 'ShieldCheck', location: '门诊楼三层' },
+  { id: 'd7', name: '药剂科', description: '中西药品调配、用药指导、药品管理', icon: 'Pill', location: '门诊楼一层' },
+  { id: 'd8', name: '功能科', description: 'B超检查、心电图检查、生化检验、血细胞分析等检查检验服务', icon: 'Activity', location: '门诊楼二层' },
 ]
 
 // 医生数据
 export const doctors: Doctor[] = [
-  { id: 'doc1', departmentId: 'd1', departmentName: '内科', name: '张建国', title: '副主任医师', specialty: '高血压、糖尿病、冠心病等慢性病诊治', avatar: '', introduction: '从医25年，擅长内科常见病、多发病的诊治，尤其在慢性病管理方面经验丰富。' },
-  { id: 'doc2', departmentId: 'd1', departmentName: '内科', name: '李秀英', title: '主治医师', specialty: '呼吸系统疾病、消化系统疾病', avatar: '', introduction: '从医15年，对呼吸道感染、胃肠炎等常见病有丰富经验。' },
-  { id: 'doc3', departmentId: 'd2', departmentName: '外科', name: '王大明', title: '副主任医师', specialty: '外伤处理、普外小手术、骨折初步处理', avatar: '', introduction: '从医20年，外科临床经验丰富，操作规范细致。' },
-  { id: 'doc4', departmentId: 'd3', departmentName: '儿科', name: '陈慧芳', title: '主治医师', specialty: '儿童常见病、新生儿疾病、儿童保健', avatar: '', introduction: '从医12年，温柔耐心，深受家长和小患儿信赖。' },
-  { id: 'doc5', departmentId: 'd4', departmentName: '中医科', name: '刘德明', title: '主任中医师', specialty: '中医内科、针灸推拿、颈肩腰腿痛', avatar: '', introduction: '从医30年，祖传中医，擅长运用中西医结合治疗各类慢性病。' },
-  { id: 'doc6', departmentId: 'd5', departmentName: '全科', name: '赵晓红', title: '主治医师', specialty: '常见病首诊、慢性病管理、健康体检', avatar: '', introduction: '全科医学硕士，从医10年，注重健康管理和疾病预防。' },
-  { id: 'doc7', departmentId: 'd6', departmentName: '妇幼保健', name: '孙丽萍', title: '副主任医师', specialty: '孕产妇保健、高危妊娠管理、妇女常见病', avatar: '', introduction: '从医18年，在孕产妇保健和妇女健康管理方面经验丰富。' },
-  { id: 'doc8', departmentId: 'd7', departmentName: '预防接种', name: '周志华', title: '主管护师', specialty: '预防接种、疫苗管理、接种反应处理', avatar: '', introduction: '从事预防接种工作15年，操作规范，态度亲切。' },
-  { id: 'doc9', departmentId: 'd8', departmentName: '口腔科', name: '吴强', title: '主治医师', specialty: '拔牙、补牙、牙周病治疗、口腔修复', avatar: '', introduction: '从医8年，技术娴熟，注重无痛操作。' },
+  { id: 'doc1', departmentId: 'd1', departmentName: '内科', name: '谭斌', title: '院长、主治医师', specialty: '针灸、中西医治疗内外妇儿常见病、脾胃病、中风后遗症、面瘫、心脑血管病、颈腰椎病、骨关节疼痛、带状疱疹、疑难杂症等', avatar: '', introduction: '咸阳市优秀医师，咸阳市中医药学会脾胃病专业委员会委员、本科学历，先后毕业于陕西省中医学校中医医士、延安大学临床医学专业、陕西中医药大学临床医学专业，从事临床诊疗20余年，擅长运用针灸、中西医治疗内外妇儿常见病、脾胃病、中风后遗症、面瘫、心脑血管病、颈腰椎病、骨关节疼痛、带状疱疹、疑难杂症等病症。曾多次被县委县政府评为优秀医生及优秀专业技术人才，被旬邑县卫健局评为健康卫士、十佳医师、旬邑好医生，在县域内群众中享有较高的声誉，多次收到群众送来感谢锦旗。' },
+  { id: 'doc2', departmentId: 'd1', departmentName: '内科', name: '燕萌', title: '内科主治医师', specialty: '心血管疾病、呼吸系统疾病、消化系统疾病、内分泌系统疾病', avatar: '', introduction: '燕萌，女，36岁，本科学历，毕业于延安大学，临床医学专业，内科主治医师，曾先后在旬邑县医院及郑家镇卫生院工作，熟练掌握内科常见疾病的诊断和治疗方法，如心血管疾病、呼吸系统疾病、消化系统疾病、内分泌系统疾病等。具备良好的医患沟通能力，能够耐心倾听患者的诉求，为患者提供专业、易懂的医疗建议。' },
+  { id: 'doc3', departmentId: 'd1', departmentName: '内科', name: '郑瑶瑶', title: '主治医师', specialty: '消化系统及呼吸系统各类疾病诊治', avatar: '', introduction: '郑瑶瑶，女，34岁，西安交通大学临床医学专业，主治医师，从事临床工作12年，先后工作于福建省将乐县疾控中心、张洪中心卫生院、旬邑县医院，赴泰兴市人民医院进修学习，参加各类学习培训，多次评为旬邑县先进工作者，对待工作认真细致，对待患者细心负责，对内科各类常见疾病有丰富的工作经验，尤其擅长消化系统及呼吸系统各类疾病诊治。' },
+  { id: 'doc4', departmentId: 'd1', departmentName: '内科', name: '杨妮', title: '内科主治医师', specialty: '糖尿病、高血压、艾滋病、丙肝等慢性病和传染病的预防控制', avatar: '', introduction: '杨妮，女，37岁，内科主治医师，本科学历，学士学位，临床医学专业，毕业于西安医学院。2012年参加工作，曾先后担任县疾病预防控制中心慢病科副科长、流病科科长，主要从事糖尿病、高血压、艾滋病、丙肝等慢性病和传染病的预防控制工作。2016年参加省疾控中心组织的现场流行病学培训班学习一年。2020年、2022年分别参与西咸国际机场、西安市新冠疫情流调工作。期间工作认真、爱岗敬业、严谨细致、能力突出，连续多次被评为先进个人。' },
+  { id: 'doc5', departmentId: 'd3', departmentName: '儿科', name: '文丽娟', title: '儿科主治医师', specialty: '儿童生长发育、儿科常见病诊治', avatar: '', introduction: '文丽娟，本科学历，儿科主治医师。2015年毕业于陕西中医药大学临床医学专业，于2015年至2025年在旬邑县妇计中心内儿科工作，曾于宝鸡市妇幼保健院进修学习儿童生长发育相关知识，并于2022年取得儿科主治医师职称。' },
 ]
 
 // 生成未来7天的号源
@@ -150,21 +146,21 @@ export const healthArticles: HealthArticle[] = [
 
 // 就诊指南数据
 export const visitingGuide = {
-  outpatientTime: '周一至周五 8:00-11:30, 14:00-17:00\n周六 8:00-12:00（仅口腔科、全科）\n急诊 24 小时',
+  outpatientTime: '周一至周五 8:00-11:30, 14:00-17:00\n周六 8:00-12:00\n急诊 24 小时',
   process: '1. 挂号（窗口或微信预约）\n2. 候诊（按叫号顺序就诊）\n3. 就诊（医生问诊检查）\n4. 缴费（窗口或医保结算）\n5. 取药/检查\n6. 离院',
   insurance: '本院已开通城乡居民医保（新农合）直接结算\n支持城镇职工医保刷卡结算\n慢性病门诊报销需提前办理慢病证\n异地就医需提前办理转诊手续',
-  transport: '地址：XX镇XX路168号\n公交：镇公交1路、2路到"卫生院站"下车\n自驾：镇中心小学往东200米，路南侧有免费停车场',
+  transport: '地址：旬邑县阳光大道幽风庭韵小区西侧\n公交：县城公交到"幽风庭韵站"下车\n自驾：阳光大道幽风庭韵小区西侧，院内设有免费停车场',
 }
 
 // 医院简介
 export const hospitalInfo = {
   name: '旬邑县城关镇卫生院',
   image: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/hospital-intro_589e337a.png?sign=1790850198-8a97c7100c-0-0009f0d9899e5c36ee07b22336e7a9b1baf5b7593ca0dffb297344f3183ebd3f',
-  summary: '旬邑县城关镇卫生院始建于1958年，是一所集医疗、预防、保健、康复、健康教育为一体的综合性乡镇卫生院。经过60余年的发展，现已成为服务全镇3.2万居民的基层医疗卫生机构。\n\n卫生院占地面积8000平方米，建筑面积5200平方米，设有门诊楼和保健楼各一栋。配备有数字化X线摄影系统（DR）、彩超、全自动生化分析仪、心电图机等先进设备。\n\n全院现有职工56人，其中高级职称5人，中级职称18人。开设内科、外科、儿科、中医科、全科、口腔科、妇幼保健、预防接种等科室，年门诊量约8万人次。',
-  serviceScope: '基本医疗服务、基本公共卫生服务、预防接种、妇幼保健、慢性病管理、健康教育、康复理疗、中医药服务等。',
-  phone: '0571-88888888',
+  summary: '旬邑县城关镇卫生院，位于县阳光大道、幽风庭韵小区西侧，是县委、县政府立足于满足县城东区居民看病就医需求，在幽风庭韵小区临街门面房基础上改建而成，项目于2024年8月开工建设、2024年12月建成完工，总建筑面积2185平方米，共分为三层，一层为门诊、中西医药房和预防接种区，二层为检验科和住院病房，三层为康复训练大厅、中医科及办公区，是一家集医疗、预防、保健为一体的公立医疗机构。\n\n医院现有干部职工18人，其中卫生专业技术人员17人、中高级以上职称14人；开设全科门诊、中医门诊、预防接种门诊、中医馆、康复训练中心、公共卫生科、药剂科、功能科等8个科室。开设床位18张，拥有B超机、心电图机、全自动生化分析仪、血细胞分析仪、中医超声治疗仪、红外线治疗仪、平衡训练、牵引治疗等检查检验及康复治疗设备46台；同时，医院门诊大厅设立便民窗口，配置轮椅、担架、热水器、茶杯等便民设施，供给有需要的患者随时取用。\n\n医院以"基础医疗+中医康复"为特色，以中西医常见病的诊断与治疗为基础，可以开展针灸、推拿、拔罐、刮痧、按摩牵引、熏蒸、中医正骨手法复位、小针刀等10类25项中医药适宜技术，为广大患者提供优质、高效、便捷的中医特色诊疗服务。',
+  serviceScope: '全科门诊、中医门诊、预防接种门诊、中医馆、康复训练中心、公共卫生科、药剂科、功能科等8个科室。提供基本医疗、预防保健、中医康复、预防接种、慢性病管理等服务。',
+  phone: '029-34411120',
   emergencyPhone: '120',
-  address: 'XX镇XX路168号',
+  address: '旬邑县阳光大道幽风庭韵小区西侧',
 }
 
 // 预约相关工具函数
