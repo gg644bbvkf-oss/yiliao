@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import {
   Stethoscope,
@@ -55,11 +55,11 @@ const HospitalPage = () => {
                   }
                 >
                   <CardContent className="p-4 flex flex-row items-center gap-3">
-                    <View className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                      <Text className="text-lg font-bold text-teal-700 block">
-                        {doc.name.charAt(0)}
-                      </Text>
-                    </View>
+                    <Image
+                      src={doc.avatar}
+                      className="w-12 h-12 rounded-full flex-shrink-0"
+                      mode="aspectFill"
+                    />
                     <View className="flex-1">
                       <View className="flex flex-row items-center gap-2">
                         <Text className="text-base font-semibold text-slate-800 block">

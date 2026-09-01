@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView, Image } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -26,11 +26,11 @@ const DoctorDetailPage = () => {
       <View className="px-4 pt-4">
         <Card className="bg-white rounded-xl shadow-sm">
           <CardContent className="p-4 flex flex-row items-center gap-4">
-            <View className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-              <Text className="text-2xl font-bold text-teal-700 block">
-                {doctor?.name.charAt(0) || ''}
-              </Text>
-            </View>
+            <Image
+              src={doctor?.avatar || ''}
+              className="w-16 h-16 rounded-full flex-shrink-0"
+              mode="aspectFill"
+            />
             <View className="flex-1">
               <Text className="text-xl font-bold text-slate-800 block">
                 {doctor?.name}
