@@ -88,13 +88,13 @@ const BookingFormPage = () => {
         },
       })
       console.log('预约响应:', res.data)
-      const appointment = res.data?.data
-      if (appointment) {
+      const body = res.data as any
+      if (body?.code === 200 && body?.data) {
         Taro.redirectTo({
-          url: `/pages/appointment/booking-result?id=${appointment.id}`,
+          url: `/pages/appointment/booking-result?id=${body.data.id}`,
         })
       } else {
-        Taro.showToast({ title: '预约失败', icon: 'none' })
+        Taro.showToast({ title: body?.msg || '预约失败', icon: 'none' })
       }
     } catch (err) {
       console.error('预约失败:', err)

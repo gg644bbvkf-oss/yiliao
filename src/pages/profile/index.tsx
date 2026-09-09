@@ -8,15 +8,21 @@ import {
   Users,
   ChevronRight,
   Settings,
+  ShieldCheck,
 } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Network } from '@/network'
 import { getAppointments, getPatients, getFavorites, healthArticles, getDateDisplay } from '@/data/mock-data'
+
+const ADMIN_PHONE_KEY = 'hospital_admin_phone'
 
 const menuItems = [
   { name: '就诊人管理', icon: Users, page: '/pages/profile/patient-manage', desc: '管理就诊人信息' },
   { name: '我的预约', icon: CalendarClock, page: '/pages/appointment/my-appointments', desc: '查看预约记录' },
+  { name: '管理后台', icon: ShieldCheck, page: '/pages/profile/admin-mgmt', desc: '预约管理 / 号源设置 / 黑名单', admin: true },
   { name: '我的收藏', icon: Heart, page: '', desc: '收藏的健康文章' },
 ]
 
@@ -25,6 +31,9 @@ const ProfilePage = () => {
   const [appointmentCount, setAppointmentCount] = useState(0)
   const [favoriteCount, setFavoriteCount] = useState(0)
   const [showFavorites, setShowFavorites] = useState(false)
+  const [showAdminLogin, setShowAdminLogin] = useState(false)
+  const [adminPhone, setAdminPhone] = useState('')
+  const [adminChecking, setAdminChecking] = useState(false)
 
   const refreshCounts = useCallback(() => {
     setPatientCount(getPatients().length)
@@ -39,8 +48,45 @@ const ProfilePage = () => {
   const handleMenuClick = (item: typeof menuItems[0]) => {
     if (item.name === '我的收藏') {
       setShowFavorites(!showFavorites)
+    } else if ((item as any).admin) {
+      // 管理员功能需验证身份
+      const saved = Taro.getStorageSync(ADMIN_PHONE_KEY)
+      if (saved) {
+        Taro.navigateTo({ url: item.page })
+      } else {
+        setAdminPhone('')
+        setShowAdminLogin(true)
+      }
     } else if (item.page) {
       Taro.navigateTo({ url: item.page })
+    }
+  }
+
+  const handleAdminLogin = async () => {
+    if (!adminPhone.trim()) {
+      Taro.showToast({ title: '请输入手机号', icon: 'none' })
+      return
+    }
+    setAdminChecking(true)
+    try {
+      const res: any = await Network.request({
+        url: `/api/admin/check?phone=${adminPhone.trim()}`,
+        method: 'GET',
+      })
+      console.log('admin check res:', JSON.stringify(res))
+      const isAdmin = res?.data?.data?.isAdmin
+      if (isAdmin) {
+        Taro.setStorageSync(ADMIN_PHONE_KEY, adminPhone.trim())
+        setShowAdminLogin(false)
+        Taro.navigateTo({ url: '/pages/profile/admin-mgmt' })
+      } else {
+        Taro.showToast({ title: '该手机号不是管理员', icon: 'none' })
+      }
+    } catch (e) {
+      console.log('admin check error:', e)
+      Taro.showToast({ title: '识别失败，请重试', icon: 'none' })
+    } finally {
+      setAdminChecking(false)
     }
   }
 
@@ -70,7 +116,7 @@ const ProfilePage = () => {
       <View className="px-4 -mt-4">
         <Card className="bg-white rounded-xl shadow-sm">
           <CardContent className="p-4 flex flex-row">
-            {menuItems.map((item, idx) => (
+            {menuItems.filter((m: any) => !m.admin).map((item, idx) => (
               <View
                 key={item.name}
                 className="flex-1 flex flex-col items-center gap-1"
@@ -209,6 +255,72 @@ const ProfilePage = () => {
           <Text className="text-base text-teal-600 font-semibold block">预约挂号</Text>
         </Button>
       </View>
+
+      {/* 管理员登录弹层 */}
+      {showAdminLogin && (
+        <View
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 200,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 32px',
+          }}
+          onClick={() => setShowAdminLogin(false)}
+        >
+          <View
+            className="bg-white rounded-2xl w-full"
+            style={{ maxWidth: 360 }}
+            onClick={(e: any) => e.stopPropagation()}
+          >
+            <View className="p-6">
+              <View className="w-12 h-12 rounded-full bg-teal-50 flex items-center justify-center mb-3">
+                <ShieldCheck size={24} color="#0D9488" />
+              </View>
+              <Text className="text-lg font-bold text-slate-800 block">
+                管理员验证
+              </Text>
+              <Text className="text-sm text-slate-500 block mt-1">
+                请输入管理员手机号以进入后台管理
+              </Text>
+              <View className="mt-4">
+                <View className="bg-slate-50 rounded-xl px-4 py-3">
+                  <Input
+                    style={{ width: '100%', fontSize: '16px' }}
+                    placeholder="管理员手机号"
+                    type="number"
+                    maxlength={11}
+                    value={adminPhone}
+                    onInput={(e: any) => setAdminPhone(e.detail.value)}
+                  />
+                </View>
+              </View>
+              <View className="mt-5 flex flex-row gap-3">
+                <Button
+                  className="flex-1 h-11 bg-slate-100 text-slate-600 rounded-xl"
+                  onClick={() => setShowAdminLogin(false)}
+                >
+                  取消
+                </Button>
+                <Button
+                  className="flex-1 h-11 bg-teal-600 text-white rounded-xl"
+                  disabled={adminChecking}
+                  onClick={() => handleAdminLogin()}
+                >
+                  {adminChecking ? '验证中...' : '进入后台'}
+                </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </ScrollView>
   )
 }

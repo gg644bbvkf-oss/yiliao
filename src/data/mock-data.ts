@@ -72,9 +72,9 @@ export interface Patient {
 
 // 科室数据
 export const departments: Department[] = [
-  { id: 'd1', name: '全科门诊', description: '常见病首诊、慢性病管理、健康咨询、转诊服务', icon: 'HeartPulse', location: '门诊楼一层' },
+  { id: 'd1', name: '内科', description: '常见病首诊、慢性病管理、心脑血管、呼吸消化系统疾病诊治', icon: 'HeartPulse', location: '门诊楼一层' },
   { id: 'd2', name: '中医门诊', description: '中医内科诊治、针灸推拿、拔罐刮痧、中药调理', icon: 'Leaf', location: '门诊楼三层' },
-  { id: 'd3', name: '预防接种门诊', description: '国家免疫规划疫苗接种、儿童入托入学查验、成人疫苗接种', icon: 'Syringe', location: '门诊楼一层' },
+  { id: 'd3', name: '儿科', description: '儿科常见病诊治、儿童生长发育评估与健康指导', icon: 'Syringe', location: '门诊楼一层' },
   { id: 'd4', name: '中医馆', description: '中医特色诊疗，开展针灸、推拿、拔罐、刮痧、按摩牵引、熏蒸、中医正骨手法复位、小针刀等10类25项中医药适宜技术', icon: 'Flower2', location: '门诊楼三层' },
   { id: 'd5', name: '康复训练中心', description: '康复理疗、平衡训练、牵引治疗、中医超声治疗、红外线治疗等康复治疗', icon: 'Dumbbell', location: '门诊楼三层' },
   { id: 'd6', name: '公共卫生科', description: '居民健康档案管理、健康教育、传染病防控、慢性病管理', icon: 'ShieldCheck', location: '门诊楼三层' },

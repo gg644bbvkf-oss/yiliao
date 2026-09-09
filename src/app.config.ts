@@ -12,6 +12,7 @@ export default typeof defineAppConfig === 'function'
       'pages/hospital/department-detail',
       'pages/hospital/doctor-detail',
       'pages/profile/patient-manage',
+      'pages/profile/admin-mgmt',
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -65,6 +66,7 @@ export default typeof defineAppConfig === 'function'
       'pages/hospital/department-detail',
       'pages/hospital/doctor-detail',
       'pages/profile/patient-manage',
+      'pages/profile/admin-mgmt',
     ],
     window: {
       backgroundTextStyle: 'light',
