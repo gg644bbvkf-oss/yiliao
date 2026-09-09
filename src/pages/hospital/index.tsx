@@ -57,12 +57,12 @@ const HospitalPage = () => {
                   {doc.avatar ? (
                     <Image
                       src={doc.avatar}
-                      className="w-16 h-16 rounded-full flex-shrink-0"
+                      className="w-20 h-28 rounded-lg flex-shrink-0"
                       mode="aspectFill"
                     />
                   ) : (
-                    <View className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                      <Text className="text-xl font-bold text-teal-700 block">
+                    <View className="w-20 h-28 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0">
+                      <Text className="text-2xl font-bold text-teal-700 block">
                         {doc.name.charAt(0)}
                       </Text>
                     </View>
