@@ -121,8 +121,8 @@ export class AdminService {
       department_id: departmentId,
       department_name: departmentName,
       date,
-      morning_quota: 20,
-      afternoon_quota: 15,
+      morning_quota: 10,
+      afternoon_quota: 5,
       is_holiday: false,
     }));
     if (toInsert.length > 0) {

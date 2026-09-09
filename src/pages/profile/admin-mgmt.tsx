@@ -79,8 +79,8 @@ export default function AdminMgmt() {
   const [deptList, setDeptList] = useState<Department[]>([])
   const [selDeptId, setSelDeptId] = useState('')
   const [selQuotaDate, setSelQuotaDate] = useState(dates[0].date)
-  const [morning, setMorning] = useState('20')
-  const [afternoon, setAfternoon] = useState('15')
+  const [morning, setMorning] = useState('10')
+  const [afternoon, setAfternoon] = useState('5')
   const [isHoliday, setIsHoliday] = useState(false)
 
   // 登录
@@ -121,6 +121,11 @@ export default function AdminMgmt() {
       setMorning(String(row.morningQuota))
       setAfternoon(String(row.afternoonQuota))
       setIsHoliday(!!row.isHoliday)
+    } else {
+      // 该日期无记录时回落到默认号源：上午10、下午5
+      setMorning('10')
+      setAfternoon('5')
+      setIsHoliday(false)
     }
   }
 
