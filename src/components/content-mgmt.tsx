@@ -288,7 +288,9 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
       const url = extractUploadUrl(r)
       if (url) {
         setHospImage(url)
-        flash('医院照片已上传，记得点保存')
+        // 上传成功后自动保存，同步到医院简介页
+        await saveHospital()
+        flash('医院照片已上传并保存')
       } else {
         // eslint-disable-next-line no-console
         console.log('hospital upload resp', r)
