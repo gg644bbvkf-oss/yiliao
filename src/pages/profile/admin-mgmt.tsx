@@ -223,6 +223,11 @@ export default function AdminMgmt() {
     setPwd('')
   }
 
+  const handleAuthFail = () => {
+    setLoggedIn(false)
+    setPwd('')
+  }
+
   useEffect(() => {
     loadAppts()
     loadBlack()
@@ -378,7 +383,7 @@ export default function AdminMgmt() {
 
           {/* 内容管理 */}
           <TabsContent value="content" className="mt-3">
-            <ContentMgmt />
+            <ContentMgmt onAuthFail={handleAuthFail} />
           </TabsContent>
 
           {/* 预约管理 */}

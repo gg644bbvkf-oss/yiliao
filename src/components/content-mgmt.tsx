@@ -6,8 +6,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { adminHeaders } from '@/utils/admin'
+import { adminHeaders, clearAdmin } from '@/utils/admin'
 import { cn } from '@/lib/utils'
+
+/** 业务请求失败：携带后端 message，便于界面给出真实提示 */
+class ApiError extends Error {
+  status: number
+  constructor(status: number, message: string) {
+    super(message)
+    this.status = status
+  }
+}
 
 interface DepItem {
   id: string
@@ -28,10 +37,20 @@ interface DoctorItem {
 }
 
 async function unwrap(p: Promise<any>): Promise<any> {
-  const res = await p
+  const res: any = await p
   // eslint-disable-next-line no-console
   console.log('API', res)
-  return res?.data || {}
+  // Taro.request 在 4xx/5xx 时不会 reject，需按 statusCode 主动判定失败
+  const status: number = res?.statusCode ?? 200
+  if (status >= 400) {
+    const message: string = res?.data?.message || res?.data?.msg || `请求失败(${status})`
+    throw new ApiError(status, message)
+  }
+  const body = res?.data || {}
+  if (body && typeof body === 'object' && body.code && body.code !== 200) {
+    throw new ApiError(status, body.msg || body.message || '操作失败')
+  }
+  return body
 }
 
 const B = (label: string, child?: React.ReactNode) => (
@@ -44,7 +63,7 @@ const B = (label: string, child?: React.ReactNode) => (
 const labelCls = 'block mb-1 text-sm text-gray-500'
 const inputWrap = 'mb-3 rounded-xl bg-gray-50 px-3 py-2'
 
-export default function ContentMgmt() {
+export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } = {}) {
   const [tab, setTab] = useState<'hospital' | 'doctor' | 'dept'>('hospital')
 
   // 医院内容
@@ -74,7 +93,26 @@ export default function ContentMgmt() {
   const [msg, setMsg] = useState('')
 
   useEffect(() => {
-    refreshAll()
+    // 挂载时先校验本地登录凭证是否仍有效，失效则直接回登录页
+    ;(async () => {
+      const h = adminHeaders()
+      if (!h['x-admin-phone']) {
+        onAuthFail && onAuthFail()
+        return
+      }
+      try {
+        await unwrap(Network.request({ url: '/api/content/admin/verify', header: h }))
+        refreshAll()
+      } catch (e: any) {
+        if (e?.status === 401) {
+          clearAdmin()
+          onAuthFail && onAuthFail()
+        } else {
+          // 网络异常等不阻塞，仍尝试拉取公开数据
+          refreshAll()
+        }
+      }
+    })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -99,18 +137,38 @@ export default function ContentMgmt() {
     setTimeout(() => setMsg(''), 2500)
   }
 
+  /** 统一执行写操作：捕获鉴权失败/网络错误，避免“假成功” */
+  async function runWrite(task: () => Promise<void>, okMsg: string) {
+    try {
+      await task()
+      flash(okMsg)
+      refreshAll()
+    } catch (e: any) {
+      // eslint-disable-next-line no-console
+      console.log('write failed', e)
+      if (e?.status === 401) {
+        clearAdmin()
+        flash('登录已过期，请重新登录')
+        setTimeout(() => onAuthFail && onAuthFail(), 800)
+      } else {
+        flash(e?.message || '保存失败，请稍后再试')
+      }
+    }
+  }
+
   async function saveHospital() {
     setSavingH(true)
     try {
-      await unwrap(
-        Network.request({
-          url: '/api/content/admin/hospital',
-          method: 'PUT',
-          header: adminHeaders(),
-          data: { intro, service, phone, address, image: hospImage },
-        }),
-      )
-      flash('医院简介已保存')
+      await runWrite(async () => {
+        await unwrap(
+          Network.request({
+            url: '/api/content/admin/hospital',
+            method: 'PUT',
+            header: adminHeaders(),
+            data: { intro, service, phone, address, image: hospImage },
+          }),
+        )
+      }, '医院简介已保存')
     } finally {
       setSavingH(false)
     }
@@ -118,44 +176,44 @@ export default function ContentMgmt() {
 
   async function addDept() {
     if (!depName.trim()) return
-    await unwrap(
-      Network.request({
-        url: '/api/content/admin/department',
-        method: 'POST',
-        header: adminHeaders(),
-        data: { name: depName, description: depDesc, location: depLoc },
-      }),
-    )
+    await runWrite(async () => {
+      await unwrap(
+        Network.request({
+          url: '/api/content/admin/department',
+          method: 'POST',
+          header: adminHeaders(),
+          data: { name: depName, description: depDesc, location: depLoc },
+        }),
+      )
+    }, '科室已添加')
     setDepName('')
     setDepDesc('')
     setDepLoc('')
-    flash('科室已添加')
-    refreshAll()
   }
 
   async function updateDept(id: string, patch: Partial<DepItem>) {
-    await unwrap(
-      Network.request({
-        url: `/api/content/admin/department/${id}`,
-        method: 'PUT',
-        header: adminHeaders(),
-        data: patch,
-      }),
-    )
-    flash('科室已更新')
-    refreshAll()
+    await runWrite(async () => {
+      await unwrap(
+        Network.request({
+          url: `/api/content/admin/department/${id}`,
+          method: 'PUT',
+          header: adminHeaders(),
+          data: patch,
+        }),
+      )
+    }, '科室已更新')
   }
 
   async function delDept(id: string) {
-    await unwrap(
-      Network.request({
-        url: `/api/content/admin/department/${id}`,
-        method: 'DELETE',
-        header: adminHeaders(),
-      }),
-    )
-    flash('科室已删除')
-    refreshAll()
+    await runWrite(async () => {
+      await unwrap(
+        Network.request({
+          url: `/api/content/admin/department/${id}`,
+          method: 'DELETE',
+          header: adminHeaders(),
+        }),
+      )
+    }, '科室已删除')
   }
 
   async function pickPhoto() {
@@ -252,40 +310,41 @@ export default function ContentMgmt() {
       departmentId: docDept || undefined,
     }
     if (editingId) {
-      await unwrap(
-        Network.request({
-          url: `/api/content/admin/doctor/${editingId}`,
-          method: 'PUT',
-          header: adminHeaders(),
-          data,
-        }),
-      )
-      flash('医生资料已更新')
+      await runWrite(async () => {
+        await unwrap(
+          Network.request({
+            url: `/api/content/admin/doctor/${editingId}`,
+            method: 'PUT',
+            header: adminHeaders(),
+            data,
+          }),
+        )
+      }, '医生资料已更新')
     } else {
-      await unwrap(
-        Network.request({
-          url: '/api/content/admin/doctor',
-          method: 'POST',
-          header: adminHeaders(),
-          data,
-        }),
-      )
-      flash('医生已添加')
+      await runWrite(async () => {
+        await unwrap(
+          Network.request({
+            url: '/api/content/admin/doctor',
+            method: 'POST',
+            header: adminHeaders(),
+            data,
+          }),
+        )
+      }, '医生已添加')
     }
     resetDocForm()
-    refreshAll()
   }
 
   async function delDoctor(id: string) {
-    await unwrap(
-      Network.request({
-        url: `/api/content/admin/doctor/${id}`,
-        method: 'DELETE',
-        header: adminHeaders(),
-      }),
-    )
-    flash('医生已删除')
-    refreshAll()
+    await runWrite(async () => {
+      await unwrap(
+        Network.request({
+          url: `/api/content/admin/doctor/${id}`,
+          method: 'DELETE',
+          header: adminHeaders(),
+        }),
+      )
+    }, '医生已删除')
   }
 
   return (
