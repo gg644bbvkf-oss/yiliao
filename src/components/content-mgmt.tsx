@@ -226,6 +226,23 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
   }
 
   async function delDept(id: string) {
+    const dep = deps.find((x) => x.id === id)
+    const docCount = doctors.filter((x) => x.departmentId === id).length
+    const tip =
+      docCount > 0
+        ? `科室「${dep?.name ?? ''}」下还有 ${docCount} 位医生，删除科室将同时删除这些医生，确定删除吗？`
+        : `确定删除科室「${dep?.name ?? ''}」吗？`
+    const ok = await new Promise<boolean>((resolve) => {
+      Taro.showModal({
+        title: '删除确认',
+        content: tip,
+        confirmText: '删除',
+        confirmColor: '#dc2626',
+        success: (r) => resolve(!!r.confirm),
+        fail: () => resolve(false),
+      })
+    })
+    if (!ok) return
     await runWrite(async () => {
       await unwrap(
         Network.request({

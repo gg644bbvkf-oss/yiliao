@@ -123,14 +123,19 @@ export class ContentService {
   }
 
   async deleteDepartment(id: string) {
+    // 级联删除该科室下的医生与号源设置（保留历史预约记录）
     const { data: docs } = await this.client.from('doctors').select('id').eq('department_id', id);
     if (docs && docs.length > 0) {
-      throw new HttpException('该科室下仍有医生，请先移除相关医生', HttpStatus.BAD_REQUEST);
+      const { error: docErr } = await this.client
+        .from('doctors')
+        .delete()
+        .eq('department_id', id);
+      if (docErr) throw new HttpException(docErr.message, HttpStatus.BAD_GATEWAY);
     }
     await this.client.from('quota_settings').delete().eq('department_id', id);
     const { error } = await this.client.from('departments').delete().eq('id', id);
     if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
-    return { deleted: true };
+    return { deleted: true, doctorCount: docs?.length ?? 0 };
   }
 
   /* ---------- 医生增删改 ---------- */
