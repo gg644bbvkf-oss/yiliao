@@ -84,14 +84,14 @@ export default function ContentMgmt() {
       unwrap(Network.request({ url: '/api/content/departments' })),
       unwrap(Network.request({ url: '/api/content/doctors' })),
     ])
-    const hc = h?.data?.content || {}
+    const hc = h?.data || {}
     setIntro(hc.intro || '')
     setService(hc.service || '')
     setPhone(hc.phone || '')
     setAddress(hc.address || '')
     setHospImage(hc.image || '')
-    setDeps(Array.isArray(d?.data?.list) ? d.data.list : [])
-    setDoctors(Array.isArray(dc?.data?.list) ? dc.data.list : [])
+    setDeps(Array.isArray(d?.data) ? d.data : [])
+    setDoctors(Array.isArray(dc?.data) ? dc.data : [])
   }
 
   function flash(s: string) {
