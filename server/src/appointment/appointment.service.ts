@@ -80,6 +80,11 @@ export class AppointmentService {
     return (count ?? 0) > 0;
   }
 
+  /** 获取某科室某日号源设置（含 isHoliday），供控制器取节假日标识 */
+  async getQuotaPublic(departmentId: string, departmentName: string, date: string) {
+    return this.getQuota(departmentId, departmentName, date);
+  }
+
   /**
    * 检查号源是否充足（返回剩余号源）
    * 返回 { ok, remaining }

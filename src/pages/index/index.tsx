@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Image } from '@tarojs/components'
-import Taro, { useLoad } from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import {
   Building2,
   Users,
@@ -39,7 +39,7 @@ const IndexPage = () => {
     address: '旬邑县阳光大道幽风庭韵小区西侧',
   })
 
-  useLoad(() => {
+  useDidShow(() => {
     loadHospital()
   })
 

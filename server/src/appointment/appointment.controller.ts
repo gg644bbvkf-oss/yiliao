@@ -54,17 +54,22 @@ export class AppointmentController {
     try {
       const morning = await this.appointmentService.checkQuota(departmentId, departmentName, date, '上午');
       const afternoon = await this.appointmentService.checkQuota(departmentId, departmentName, date, '下午');
+      // 返回扁平字段，与前端 booking-form 期望一致
+      const morningQuota = await this.appointmentService.getQuotaPublic(departmentId, departmentName, date);
       return {
         code: 200,
         msg: 'success',
         data: {
           date,
-          morning: { available: morning.ok, remaining: morning.remaining, total: morning.total },
-          afternoon: { available: afternoon.ok, remaining: afternoon.remaining, total: afternoon.total },
+          morningQuota: morning.total,
+          afternoonQuota: afternoon.total,
+          morningLeft: morning.remaining,
+          afternoonLeft: afternoon.remaining,
+          isHoliday: morningQuota?.isHoliday ?? false,
         },
       };
     } catch (e: any) {
-      return { code: 500, msg: e.message || '查询号源失败' };
+      return { code: 200, msg: e.message || '查询号源失败', data: null };
     }
   }
 
