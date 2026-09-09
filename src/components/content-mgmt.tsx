@@ -52,6 +52,8 @@ export default function ContentMgmt() {
   const [service, setService] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [hospImage, setHospImage] = useState('')
+  const [uploadingHosp, setUploadingHosp] = useState(false)
   const [savingH, setSavingH] = useState(false)
 
   // 科室
@@ -87,6 +89,7 @@ export default function ContentMgmt() {
     setService(hc.service || '')
     setPhone(hc.phone || '')
     setAddress(hc.address || '')
+    setHospImage(hc.image || '')
     setDeps(Array.isArray(d?.data?.list) ? d.data.list : [])
     setDoctors(Array.isArray(dc?.data?.list) ? dc.data.list : [])
   }
@@ -104,7 +107,7 @@ export default function ContentMgmt() {
           url: '/api/content/admin/hospital',
           method: 'PUT',
           header: adminHeaders(),
-          data: { intro, service, phone, address },
+          data: { intro, service, phone, address, image: hospImage },
         }),
       )
       flash('医院简介已保存')
@@ -185,6 +188,39 @@ export default function ContentMgmt() {
       }
     } finally {
       setUploading(false)
+    }
+  }
+
+  async function pickHospitalPhoto() {
+    const env = Taro.getEnv()
+    const isMini = env === Taro.ENV_TYPE.WEAPP || env === Taro.ENV_TYPE.TT
+    if (!isMini) {
+      flash('请在小程序内上传照片')
+      return
+    }
+    const res = await Taro.chooseImage({ count: 1, sizeType: ['compressed'] })
+    const filePath = res.tempFilePaths[0]
+    setUploadingHosp(true)
+    try {
+      const r = await Network.uploadFile({
+        url: '/api/content/admin/upload',
+        filePath,
+        name: 'file',
+        header: adminHeaders() as any,
+      })
+      const rr: any = r as any
+      const body = rr?.data?.data || rr?.data
+      const url = body?.url || body?.imageUrl
+      if (url) {
+        setHospImage(url)
+        flash('医院照片已上传，记得点保存')
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('hospital upload resp', r)
+        flash('照片上传失败')
+      }
+    } finally {
+      setUploadingHosp(false)
     }
   }
 
@@ -285,13 +321,26 @@ export default function ContentMgmt() {
         <View>
           {B('医院简介', (
             <View className="mt-2">
+              <Text className={labelCls}>医院照片</Text>
+              <View className="mb-2 flex items-center gap-3">
+                {hospImage ? (
+                  <Image src={hospImage} className="h-20 w-32 rounded-lg" mode="aspectFill" />
+                ) : (
+                  <View className="flex h-20 w-32 items-center justify-center rounded-lg bg-gray-100">
+                    <Text className="block text-xs text-gray-400">暂无照片</Text>
+                  </View>
+                )}
+                <Button size="sm" variant="outline" onClick={pickHospitalPhoto}>
+                  <Text>{uploadingHosp ? '上传中...' : '上传照片'}</Text>
+                </Button>
+              </View>
               <Text className={labelCls}>简介内容</Text>
               <View className={inputWrap}>
-                <Textarea style={{ width: '100%', minHeight: 90 }} value={intro} onInput={(e) => setIntro(e.detail.value)} placeholder="输入医院简介" />
+                <Textarea style={{ width: '100%', minHeight: 90 }} maxlength={-1} value={intro} onInput={(e) => setIntro(e.detail.value)} placeholder="输入医院简介（不限字数）" />
               </View>
               <Text className={labelCls}>服务范围</Text>
               <View className={inputWrap}>
-                <Textarea style={{ width: '100%', minHeight: 70 }} value={service} onInput={(e) => setService(e.detail.value)} placeholder="输入服务范围" />
+                <Textarea style={{ width: '100%', minHeight: 70 }} maxlength={-1} value={service} onInput={(e) => setService(e.detail.value)} placeholder="输入服务范围（不限字数）" />
               </View>
               <Text className={labelCls}>咨询电话</Text>
               <View className={inputWrap}>
