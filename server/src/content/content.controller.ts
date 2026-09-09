@@ -44,7 +44,20 @@ export class ContentController {
   @Get('admin/verify')
   async verify(@Headers() headers: Record<string, string>) {
     const admin = await this.service.verifyAdmin(headers['x-admin-phone'] || '', headers['x-admin-password'] || '');
-    return { code: 200, data: admin };
+    return { code: 200, data: { ...admin, isAdmin: true } };
+  }
+
+  /* ---------- 修改管理员密码 ---------- */
+  @Post('admin/change-password')
+  async changePassword(@Headers() h: Record<string, string>, @Body() body: any) {
+    await this.checkAdmin(h); // 校验旧密码（header）
+    const newPassword = body?.newPassword;
+    if (!newPassword) throw new HttpException('新密码不能为空', HttpStatus.BAD_REQUEST);
+    if (String(newPassword).length < 6) throw new HttpException('新密码至少 6 位', HttpStatus.BAD_REQUEST);
+    return {
+      code: 200,
+      data: await this.service.changePassword((h['x-admin-phone'] as string) || '', String(newPassword)),
+    };
   }
 
   /* ---------- 医院内容编辑 ---------- */

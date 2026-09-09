@@ -37,6 +37,14 @@ export class ContentService {
     return data[0];
   }
 
+  /** 修改管理员登录密码（旧密码由调用方先经 verifyAdmin 校验） */
+  async changePassword(phone: string, newPassword: string) {
+    const pwdHash = createHash('sha256').update(newPassword).digest('hex');
+    const { error } = await this.client.from('admins').update({ password: pwdHash }).eq('phone', phone);
+    if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
+    return { updated: true };
+  }
+
   /* ---------- 公开读取 ---------- */
   async getHospitalContent(): Promise<Record<string, string>> {
     const { data, error } = await this.client.from('hospital_content').select('key, value');

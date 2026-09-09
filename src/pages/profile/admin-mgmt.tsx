@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
+import Taro from '@tarojs/taro'
 import { Network } from '@/network'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { LockKeyhole } from 'lucide-react-taro'
 import type { Department } from '@/data/mock-data'
 import { cn } from '@/lib/utils'
 import ContentMgmt from '@/components/content-mgmt'
-import { getAdminToken, setAdminInfo } from '@/utils/admin'
+import { getAdmin, getAdminToken, setAdminInfo } from '@/utils/admin'
+
+const ADMIN_PHONE_KEY = 'hospital_admin_phone'
 
 interface ApptItem {
   id: string
@@ -84,6 +89,13 @@ export default function AdminMgmt() {
   const [pwd, setPwd] = useState('')
   const [loginErr, setLoginErr] = useState('')
 
+  // 修改密码
+  const [showPwd, setShowPwd] = useState(false)
+  const [oldPwd, setOldPwd] = useState('')
+  const [newPwd, setNewPwd] = useState('')
+  const [confirmPwd, setConfirmPwd] = useState('')
+  const [pwdMsg, setPwdMsg] = useState('')
+
   // 黑名单
   const [blackList, setBlackList] = useState<BlackItem[]>([])
   const [bkName, setBkName] = useState('')
@@ -135,20 +147,80 @@ export default function AdminMgmt() {
       return
     }
     try {
-      const res = await Network.request({
+      // eslint-disable-next-line no-console
+      console.log('login request', { phone, pwd })
+      const res: any = await Network.request({
         url: '/api/content/admin/verify',
         method: 'GET',
         header: { 'x-admin-phone': phone, 'x-admin-password': pwd },
       })
-      if ((res as any).data?.isAdmin) {
+      // eslint-disable-next-line no-console
+      console.log('login response', JSON.stringify(res))
+      if (res?.data?.code === 200 && res?.data?.data?.isAdmin) {
         setAdminInfo(phone, pwd)
+        Taro.setStorageSync(ADMIN_PHONE_KEY, phone)
         setLoggedIn(true)
       } else {
-        setLoginErr('手机号或密码错误')
+        setLoginErr(res?.data?.data === false || typeof res?.data === 'string'
+          ? '手机号或密码错误'
+          : '手机号或密码错误')
       }
     } catch (e: any) {
-      setLoginErr(e?.message || '登录失败，请稍后再试')
+      // eslint-disable-next-line no-console
+      console.log('login error', e)
+      const status = e?.statusCode
+      setLoginErr(status === 401 ? '手机号或密码错误' : '登录失败，请稍后再试')
     }
+  }
+
+  const handleChangePwd = async () => {
+    setPwdMsg('')
+    if (!oldPwd || !newPwd || !confirmPwd) {
+      setPwdMsg('请完整填写信息')
+      return
+    }
+    if (newPwd.length < 6) {
+      setPwdMsg('新密码至少 6 位')
+      return
+    }
+    if (newPwd !== confirmPwd) {
+      setPwdMsg('两次输入的新密码不一致')
+      return
+    }
+    const cred = getAdmin() // 存有当前登录凭证
+    const adminPhone = cred?.phone ?? phone
+    try {
+      const res: any = await Network.request({
+        url: '/api/content/admin/change-password',
+        method: 'POST',
+        header: { 'x-admin-phone': adminPhone, 'x-admin-password': oldPwd },
+        data: { newPassword: newPwd },
+      })
+      if (res?.data?.code === 200) {
+        setAdminInfo(adminPhone, newPwd)
+        setPwdMsg('')
+        setOldPwd('')
+        setNewPwd('')
+        setConfirmPwd('')
+        setShowPwd(false)
+        Taro.showToast({ title: '密码修改成功', icon: 'success' })
+      } else {
+        setPwdMsg(res?.data?.code === 401 ? '原密码错误' : '修改失败，请重试')
+      }
+    } catch (e: any) {
+      setPwdMsg(e?.statusCode === 401 ? '原密码错误' : '修改失败，请检查网络')
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      Taro.clearStorageSync()
+    } catch {
+      /* ignore */
+    }
+    setLoggedIn(false)
+    setPhone('')
+    setPwd('')
   }
 
   useEffect(() => {
@@ -265,8 +337,34 @@ export default function AdminMgmt() {
   return (
     <View className="min-h-screen bg-gray-50 pb-10">
       <View className="bg-teal-600 px-4 py-4">
-        <Text className="block text-xl font-bold text-white">卫生院管理后台</Text>
-        <Text className="block text-sm text-teal-50 mt-1">内容管理 · 预约管理 · 号源设置 · 黑名单</Text>
+        <View className="flex flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="block text-xl font-bold text-white">卫生院管理后台</Text>
+            <Text className="block text-sm text-teal-50 mt-1">内容管理 · 预约管理 · 号源设置 · 黑名单</Text>
+          </View>
+          <View className="flex flex-row gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="bg-teal-500 text-white"
+              onClick={() => {
+                setShowPwd(true)
+                setPwdMsg('')
+              }}
+            >
+              <LockKeyhole size={14} color="#ffffff" className="mr-1" />
+              <Text className="text-xs">改密</Text>
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="bg-teal-500 text-white"
+              onClick={handleLogout}
+            >
+              <Text className="text-xs">退出</Text>
+            </Button>
+          </View>
+        </View>
       </View>
 
       <View className="px-4 mt-4">
@@ -452,6 +550,68 @@ export default function AdminMgmt() {
           </TabsContent>
         </Tabs>
       </View>
+
+      {/* 修改密码弹窗 */}
+      <Dialog open={showPwd} onOpenChange={setShowPwd}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>修改管理员密码</DialogTitle>
+          </DialogHeader>
+          <View className="mt-2 space-y-3">
+            <View>
+              <Text className="block text-sm text-gray-500 mb-1">原密码</Text>
+              <View className="bg-gray-50 rounded-xl px-4 py-3">
+                <Input
+                  value={oldPwd}
+                  onInput={(e: any) => setOldPwd(e.detail.value)}
+                  placeholder="请输入当前密码"
+                />
+              </View>
+            </View>
+            <View>
+              <Text className="block text-sm text-gray-500 mb-1">新密码（至少6位）</Text>
+              <View className="bg-gray-50 rounded-xl px-4 py-3">
+                <Input
+                  value={newPwd}
+                  onInput={(e: any) => setNewPwd(e.detail.value)}
+                  placeholder="请输入新密码"
+                />
+              </View>
+            </View>
+            <View>
+              <Text className="block text-sm text-gray-500 mb-1">确认新密码</Text>
+              <View className="bg-gray-50 rounded-xl px-4 py-3">
+                <Input
+                  value={confirmPwd}
+                  onInput={(e: any) => setConfirmPwd(e.detail.value)}
+                  placeholder="请再次输入新密码"
+                />
+              </View>
+            </View>
+            {pwdMsg ? (
+              <Text className="block text-sm text-red-500">{pwdMsg}</Text>
+            ) : null}
+          </View>
+          <DialogFooter className="flex flex-row gap-3 mt-4">
+            <Button
+              className="flex-1"
+              variant="outline"
+              onClick={() => {
+                setShowPwd(false)
+                setOldPwd('')
+                setNewPwd('')
+                setConfirmPwd('')
+                setPwdMsg('')
+              }}
+            >
+              <Text>取消</Text>
+            </Button>
+            <Button className="flex-1 bg-teal-600" onClick={handleChangePwd}>
+              <Text>确认修改</Text>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </View>
   )
 }
