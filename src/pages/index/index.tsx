@@ -8,7 +8,7 @@ import {
   Phone,
   MapPin,
   ChevronRight,
-  CalendarPlus,
+  ArrowRight,
 } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
 import { Network } from '@/network'
@@ -83,25 +83,25 @@ const IndexPage = () => {
 
   return (
     <ScrollView scrollY className="h-full bg-teal-50">
-      {/* 顶部医院名称 */}
-      <View className="bg-teal-600 px-4 pt-4 pb-3">
-        <Text className="block text-2xl font-bold text-white">旬邑县城关镇卫生院</Text>
-        <Text className="block text-sm text-teal-100 mt-1">守护您和家人的健康</Text>
+      {/* 顶部医院名称（居中） */}
+      <View className="bg-teal-600 px-4 pt-4 pb-3 flex flex-col items-center">
+        <Text className="block text-2xl font-bold text-white text-center">旬邑县城关镇卫生院</Text>
+        <Text className="block text-sm text-teal-100 mt-1 text-center">守护您和家人的健康</Text>
       </View>
 
-      {/* 预约挂号大按钮（置顶突出） */}
+      {/* 预约挂号大按钮（置顶突出，橙色底 + 红色箭头） */}
       <View className="px-4 -mt-2">
         <View
           className="rounded-2xl px-5 py-4 flex flex-row items-center justify-between shadow-md mt-3 active:opacity-90"
-          style={{ backgroundColor: '#0D9488' }}
+          style={{ backgroundColor: '#F97316' }}
           onClick={handleGoAppointment}
         >
           <View>
             <Text className="block text-xl font-bold text-white">在线预约挂号</Text>
-            <Text className="block text-sm text-teal-100 mt-1">全科 · 中医 · 住院，免排队，便捷就诊</Text>
+            <Text className="block text-sm text-orange-100 mt-1">全科 · 中医 · 住院，免排队，便捷就诊</Text>
           </View>
-          <View className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center flex-shrink-0">
-            <CalendarPlus size={22} color="#ffffff" />
+          <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+            <ArrowRight size={26} color="#EF4444" strokeWidth={2.5} />
           </View>
         </View>
       </View>
