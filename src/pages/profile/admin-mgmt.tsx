@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { departments, type Department } from '@/data/mock-data'
+import type { Department } from '@/data/mock-data'
 import { cn } from '@/lib/utils'
+import ContentMgmt from '@/components/content-mgmt'
+import { getAdminToken, setAdminInfo } from '@/utils/admin'
 
 interface ApptItem {
   id: string
@@ -69,12 +71,18 @@ export default function AdminMgmt() {
   const [selDate, setSelDate] = useState(dates[0].date)
 
   // 号源设置
-  const [deptList] = useState<Department[]>(departments)
-  const [selDeptId, setSelDeptId] = useState(departments[0]?.id || '')
+  const [deptList, setDeptList] = useState<Department[]>([])
+  const [selDeptId, setSelDeptId] = useState('')
   const [selQuotaDate, setSelQuotaDate] = useState(dates[0].date)
   const [morning, setMorning] = useState('20')
   const [afternoon, setAfternoon] = useState('15')
   const [isHoliday, setIsHoliday] = useState(false)
+
+  // 登录
+  const [loggedIn, setLoggedIn] = useState<boolean>(!!getAdminToken())
+  const [phone, setPhone] = useState('')
+  const [pwd, setPwd] = useState('')
+  const [loginErr, setLoginErr] = useState('')
 
   // 黑名单
   const [blackList, setBlackList] = useState<BlackItem[]>([])
@@ -88,7 +96,7 @@ export default function AdminMgmt() {
   }
 
   const loadQuota = async (deptId: string, date: string) => {
-    const dept = departments.find((d) => d.id === deptId)
+    const dept = deptList.find((d) => d.id === deptId)
     const { data } = await unwrap(
       Network.request({
         url: '/api/admin/quota',
@@ -109,10 +117,44 @@ export default function AdminMgmt() {
     setBlackList((data?.list || data || []) as BlackItem[])
   }
 
+  const loadDepts = async () => {
+    const { data } = await unwrap(Network.request({ url: '/api/content/departments' }))
+    const list = (data?.list || data || []) as Department[]
+    setDeptList(list)
+    if (list.length) {
+      const cur = list.find((d) => d.id === selDeptId) ? selDeptId : list[0].id
+      setSelDeptId(cur)
+      loadQuota(cur, selQuotaDate)
+    }
+  }
+
+  const handleLogin = async () => {
+    setLoginErr('')
+    if (!phone || !pwd) {
+      setLoginErr('请输入手机号和密码')
+      return
+    }
+    try {
+      const res = await Network.request({
+        url: '/api/content/admin/verify',
+        method: 'GET',
+        header: { 'x-admin-phone': phone, 'x-admin-password': pwd },
+      })
+      if ((res as any).data?.isAdmin) {
+        setAdminInfo(phone, pwd)
+        setLoggedIn(true)
+      } else {
+        setLoginErr('手机号或密码错误')
+      }
+    } catch (e: any) {
+      setLoginErr(e?.message || '登录失败，请稍后再试')
+    }
+  }
+
   useEffect(() => {
     loadAppts()
     loadBlack()
-    loadQuota(departments[0]?.id || '', dates[0].date)
+    loadDepts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -122,7 +164,7 @@ export default function AdminMgmt() {
   }
 
   const handleSaveQuota = async () => {
-    const dept = departments.find((d) => d.id === selDeptId)
+    const dept = deptList.find((d) => d.id === selDeptId)
     const res = await unwrap(
       Network.request({
         url: '/api/admin/quota',
@@ -143,7 +185,7 @@ export default function AdminMgmt() {
   }
 
   const handleSaveInitial = async (deptId: string, date: string) => {
-    const dept = departments.find((d) => d.id === deptId)
+    const dept = deptList.find((d) => d.id === deptId)
     await unwrap(
       Network.request({
         url: '/api/admin/quota',
@@ -184,20 +226,62 @@ export default function AdminMgmt() {
   const filtered = appts.filter((a) => a.date === selDate && a.status !== 'cancelled')
   const isTodayQuota = selQuotaDate === dates[0].date
 
+  if (!loggedIn) {
+    return (
+      <View className="min-h-screen bg-gray-50 pb-10">
+        <View className="bg-teal-600 px-4 py-6">
+          <Text className="block text-xl font-bold text-white">卫生院管理后台</Text>
+          <Text className="block text-sm text-teal-50 mt-1">请输入管理员账号密码登录</Text>
+        </View>
+        <View className="px-4 mt-6">
+          <View className="bg-white rounded-2xl p-5 shadow-sm">
+            <Text className="block text-lg font-bold text-gray-800 text-center mb-4">管理员登录</Text>
+            <View className="bg-gray-50 rounded-xl px-4 py-3 mb-3">
+              <Input
+                value={phone}
+                onInput={(e) => setPhone(e.detail.value)}
+                placeholder="请输入管理员手机号"
+              />
+            </View>
+            <View className="bg-gray-50 rounded-xl px-4 py-3 mb-3">
+              <Input
+                value={pwd}
+                onInput={(e) => setPwd(e.detail.value)}
+                placeholder="请输入登录密码"
+              />
+            </View>
+            {loginErr ? (
+              <Text className="block text-sm text-red-500 text-center mb-3">{loginErr}</Text>
+            ) : null}
+            <Button className="w-full bg-teal-600 text-white py-3" onClick={handleLogin}>
+              <Text className="text-base">登 录</Text>
+            </Button>
+          </View>
+        </View>
+      </View>
+    )
+  }
+
   return (
     <View className="min-h-screen bg-gray-50 pb-10">
       <View className="bg-teal-600 px-4 py-4">
         <Text className="block text-xl font-bold text-white">卫生院管理后台</Text>
-        <Text className="block text-sm text-teal-50 mt-1">预约管理 · 号源设置 · 黑名单管理</Text>
+        <Text className="block text-sm text-teal-50 mt-1">内容管理 · 预约管理 · 号源设置 · 黑名单</Text>
       </View>
 
       <View className="px-4 mt-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-3 !h-11">
+          <TabsList className="w-full grid grid-cols-4 !h-11">
+            <TabsTrigger value="content">内容管理</TabsTrigger>
             <TabsTrigger value="appointments">预约管理</TabsTrigger>
             <TabsTrigger value="quota">号源设置</TabsTrigger>
             <TabsTrigger value="blacklist">黑名单</TabsTrigger>
           </TabsList>
+
+          {/* 内容管理 */}
+          <TabsContent value="content" className="mt-3">
+            <ContentMgmt />
+          </TabsContent>
 
           {/* 预约管理 */}
           <TabsContent value="appointments" className="mt-3">

@@ -1,27 +1,74 @@
 import { View, Text, ScrollView, Image } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useLoad } from '@tarojs/taro'
 import {
   Building2,
   Users,
   Award,
   HeartPulse,
-  Clock,
   Phone,
   MapPin,
   ChevronRight,
+  CalendarPlus,
 } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
-import { hospitalInfo } from '@/data/mock-data'
+import { Network } from '@/network'
+import { useState } from 'react'
 import './index.css'
 
-const stats = [
-  { label: '建筑面积', value: '2185㎡', icon: Building2 },
-  { label: '职工人数', value: '18人', icon: Users },
-  { label: '中高级职称', value: '14人', icon: Award },
-  { label: '开设床位', value: '18张', icon: HeartPulse },
-]
+interface HospitalData {
+  intro: string
+  service: string
+  image: string
+  stats: Array<{ label: string; value: string }>
+  phone: string
+  address: string
+}
 
 const IndexPage = () => {
+  const [hospital, setHospital] = useState<HospitalData>({
+    intro: '',
+    service: '',
+    image: '',
+    stats: [
+      { label: '建筑面积', value: '2185㎡' },
+      { label: '职工人数', value: '18人' },
+      { label: '中高级职称', value: '14人' },
+      { label: '开设床位', value: '18张' },
+    ],
+    phone: '0910-3456789',
+    address: '旬邑县阳光大道幽风庭韵小区西侧',
+  })
+
+  useLoad(() => {
+    loadHospital()
+  })
+
+  const loadHospital = async () => {
+    try {
+      const res = await Network.request({ url: '/api/content/hospital' })
+      const data = res.data?.data || {}
+      let stats = hospital.stats
+      try {
+        const parsed = JSON.parse(data.stats || '[]')
+        if (Array.isArray(parsed) && parsed.length) stats = parsed
+      } catch {
+        /* ignore */
+      }
+      setHospital({
+        intro: data.intro || hospital.intro,
+        service: data.service || hospital.service,
+        image: data.image || '',
+        stats,
+        phone: data.phone || hospital.phone,
+        address: data.address || hospital.address,
+      })
+    } catch {
+      /* 保持默认 */
+    }
+  }
+
+  const statsIcons = [Building2, Users, Award, HeartPulse]
+
   const handleGoAppointment = () => {
     Taro.switchTab({ url: '/pages/appointment/index' })
   }
@@ -31,25 +78,44 @@ const IndexPage = () => {
   }
 
   const handleCallPhone = () => {
-    Taro.makePhoneCall({ phoneNumber: hospitalInfo.phone })
+    Taro.makePhoneCall({ phoneNumber: hospital.phone })
   }
 
   return (
     <ScrollView scrollY className="h-full bg-teal-50">
       {/* 顶部医院名称 */}
-      <View className="bg-teal-600 px-4 pt-4 pb-6">
-        <Text className="block text-2xl font-bold text-white">{hospitalInfo.name}</Text>
+      <View className="bg-teal-600 px-4 pt-4 pb-3">
+        <Text className="block text-2xl font-bold text-white">旬邑县城关镇卫生院</Text>
         <Text className="block text-sm text-teal-100 mt-1">守护您和家人的健康</Text>
       </View>
 
+      {/* 预约挂号大按钮（置顶突出） */}
+      <View className="px-4 -mt-2">
+        <View
+          className="rounded-2xl px-5 py-4 flex flex-row items-center justify-between shadow-md mt-3 active:opacity-90"
+          style={{ backgroundColor: '#0D9488' }}
+          onClick={handleGoAppointment}
+        >
+          <View>
+            <Text className="block text-xl font-bold text-white">在线预约挂号</Text>
+            <Text className="block text-sm text-teal-100 mt-1">全科 · 中医 · 住院，免排队，便捷就诊</Text>
+          </View>
+          <View className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center flex-shrink-0">
+            <CalendarPlus size={22} color="#ffffff" />
+          </View>
+        </View>
+      </View>
+
       {/* 医院图片 */}
-      <View className="px-4 -mt-3">
+      <View className="px-4 mt-4">
         <Card className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <Image
-            className="w-full h-48"
-            src={hospitalInfo.image}
-            mode="aspectFill"
-          />
+          {hospital.image ? (
+            <Image className="w-full h-48" src={hospital.image} mode="aspectFill" />
+          ) : (
+            <View className="w-full h-48 bg-gradient-to-r from-teal-500 to-emerald-400 flex items-center justify-center">
+              <Text className="block text-lg text-white font-semibold">旬邑县城关镇卫生院</Text>
+            </View>
+          )}
         </Card>
       </View>
 
@@ -57,8 +123,8 @@ const IndexPage = () => {
       <View className="px-4 mt-4">
         <Card className="bg-white rounded-xl shadow-sm">
           <CardContent className="p-4 flex flex-row">
-            {stats.map((stat) => {
-              const IconComp = stat.icon
+            {hospital.stats.slice(0, 4).map((stat, idx) => {
+              const IconComp = statsIcons[idx] || HeartPulse
               return (
                 <View key={stat.label} className="flex-1 flex flex-col items-center gap-1">
                   <IconComp size={20} color="#0D9488" />
@@ -71,7 +137,7 @@ const IndexPage = () => {
         </Card>
       </View>
 
-      {/* 医院简介 */}
+      {/* 医院概况 */}
       <View className="px-4 mt-4">
         <Card className="bg-white rounded-xl shadow-sm">
           <CardContent className="p-4">
@@ -80,7 +146,7 @@ const IndexPage = () => {
               <Text className="text-lg font-bold text-slate-800 block">医院概况</Text>
             </View>
             <Text className="text-base text-slate-700 block leading-relaxed whitespace-pre-line">
-              {hospitalInfo.summary}
+              {hospital.intro}
             </Text>
           </CardContent>
         </Card>
@@ -94,9 +160,7 @@ const IndexPage = () => {
               <HeartPulse size={18} color="#0D9488" />
               <Text className="text-lg font-bold text-slate-800 block">服务范围</Text>
             </View>
-            <Text className="text-base text-slate-700 block leading-relaxed">
-              {hospitalInfo.serviceScope}
-            </Text>
+            <Text className="text-base text-slate-700 block leading-relaxed">{hospital.service}</Text>
           </CardContent>
         </Card>
       </View>
@@ -111,20 +175,7 @@ const IndexPage = () => {
               </View>
               <View className="flex-1">
                 <Text className="text-base font-semibold text-slate-800 block">医生团队</Text>
-                <Text className="text-sm text-slate-500 block mt-1">查看科室与医生介绍</Text>
-              </View>
-              <ChevronRight size={18} color="#94A3B8" />
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white rounded-xl shadow-sm active:opacity-80" onClick={handleGoAppointment}>
-            <CardContent className="p-4 flex flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0">
-                <Clock size={20} color="#F97316" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-slate-800 block">预约挂号</Text>
-                <Text className="text-sm text-slate-500 block mt-1">在线预约，便捷就诊</Text>
+                <Text className="text-sm text-slate-500 block mt-1">查看医生介绍与擅长</Text>
               </View>
               <ChevronRight size={18} color="#94A3B8" />
             </CardContent>
@@ -137,7 +188,7 @@ const IndexPage = () => {
               </View>
               <View className="flex-1">
                 <Text className="text-base font-semibold text-slate-800 block">咨询电话</Text>
-                <Text className="text-sm text-slate-500 block mt-1">{hospitalInfo.phone}</Text>
+                <Text className="text-sm text-slate-500 block mt-1">{hospital.phone}</Text>
               </View>
               <ChevronRight size={18} color="#94A3B8" />
             </CardContent>
@@ -150,7 +201,7 @@ const IndexPage = () => {
               </View>
               <View className="flex-1">
                 <Text className="text-base font-semibold text-slate-800 block">医院地址</Text>
-                <Text className="text-sm text-slate-500 block mt-1">{hospitalInfo.address}</Text>
+                <Text className="text-sm text-slate-500 block mt-1">{hospital.address}</Text>
               </View>
             </CardContent>
           </Card>
