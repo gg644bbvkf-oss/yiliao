@@ -177,7 +177,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
     }
   }
 
-  async function saveHospital() {
+  async function saveHospital(overrideImage?: string) {
     setSavingH(true)
     try {
       await runWrite(async () => {
@@ -186,7 +186,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
             url: '/api/content/admin/hospital',
             method: 'PUT',
             header: adminHeaders(),
-            data: { intro, service, phone, address, image: hospImage },
+            data: { intro, service, phone, address, image: overrideImage ?? hospImage },
           }),
         )
       }, '医院简介已保存')
@@ -288,8 +288,8 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
       const url = extractUploadUrl(r)
       if (url) {
         setHospImage(url)
-        // 上传成功后自动保存，同步到医院简介页
-        await saveHospital()
+        // 上传成功后自动保存（显式传入刚上传的 url，避免 setState 异步闭包读到旧值）
+        await saveHospital(url)
         flash('医院照片已上传并保存')
       } else {
         // eslint-disable-next-line no-console
@@ -428,7 +428,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
               <View className={inputWrap}>
                 <Input style={{ width: '100%' }} value={address} onInput={(e) => setAddress(e.detail.value)} placeholder="地址" />
               </View>
-              <Button size="sm" className="w-full" onClick={saveHospital}>
+              <Button size="sm" className="w-full" onClick={() => saveHospital()}>
                 <Text>{savingH ? '保存中...' : '保存医院简介'}</Text>
               </Button>
             </View>
