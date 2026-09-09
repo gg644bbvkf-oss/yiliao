@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import {
   User,
   CalendarClock,
@@ -18,6 +18,7 @@ import { Network } from '@/network'
 import { getAppointments, getPatients, getFavorites, healthArticles, getDateDisplay } from '@/data/mock-data'
 
 const ADMIN_PHONE_KEY = 'hospital_admin_phone'
+const USER_PHONE_KEY = 'hospital_user_phone'
 
 const menuItems = [
   { name: '就诊人管理', icon: Users, page: '/pages/profile/patient-manage', desc: '管理就诊人信息' },
@@ -34,16 +35,22 @@ const ProfilePage = () => {
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [adminPhone, setAdminPhone] = useState('')
   const [adminChecking, setAdminChecking] = useState(false)
+  const [userPhone, setUserPhone] = useState(() => Taro.getStorageSync(USER_PHONE_KEY) || '')
 
   const refreshCounts = useCallback(() => {
     setPatientCount(getPatients().length)
     setAppointmentCount(getAppointments().filter((a) => a.status === 'pending').length)
     setFavoriteCount(getFavorites().length)
+    setUserPhone(Taro.getStorageSync(USER_PHONE_KEY) || '')
   }, [])
 
   useEffect(() => {
     refreshCounts()
   }, [refreshCounts])
+
+  useDidShow(() => {
+    refreshCounts()
+  })
 
   const handleMenuClick = (item: typeof menuItems[0]) => {
     if (item.name === '我的收藏') {
@@ -105,8 +112,8 @@ const ProfilePage = () => {
             <User size={32} color="#0D9488" />
           </View>
           <View className="flex-1">
-            <Text className="text-xl font-bold text-white block">居民用户</Text>
-            <Text className="text-sm text-teal-100 block mt-1">XX镇卫生院为您服务</Text>
+            <Text className="text-xl font-bold text-white block">{userPhone || '居民用户'}</Text>
+            <Text className="text-sm text-teal-100 block mt-1">旬邑县城关镇卫生院为您服务</Text>
           </View>
           <Settings size={22} color="#ffffff" />
         </View>

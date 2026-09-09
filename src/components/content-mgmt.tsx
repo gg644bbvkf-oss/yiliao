@@ -53,6 +53,27 @@ async function unwrap(p: Promise<any>): Promise<any> {
   return body
 }
 
+/**
+ * 兼容解析上传响应中的图片 URL。
+ * 说明：微信/抖音小程序端 Taro.uploadFile 的 res.data 是 JSON 字符串，需先 parse；
+ * H5 端则可能是已解析对象；返回结构可能是 {url} 或 {imageUrl} 或 {data:{url}}。
+ */
+function extractUploadUrl(r: any): string {
+  if (!r) return ''
+  let body: any = r?.data ?? r
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body)
+    } catch {
+      return ''
+    }
+  }
+  if (body && typeof body === 'object') {
+    return String(body?.data?.url || body?.url || body?.imageUrl || '')
+  }
+  return ''
+}
+
 const B = (label: string, child?: React.ReactNode) => (
   <View className="mb-2 rounded-xl border border-teal-100 bg-white p-3 shadow-sm">
     <Text className="block text-base font-semibold text-gray-800">{label}</Text>
@@ -233,9 +254,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
         name: 'file',
         header: adminHeaders() as any,
       })
-      const rr: any = r as any
-      const body = rr?.data?.data || rr?.data
-      const url = body?.url || body?.imageUrl
+      const url = extractUploadUrl(r)
       if (url) {
         setDocAvatar(url)
         flash('照片已上传')
@@ -266,9 +285,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
         name: 'file',
         header: adminHeaders() as any,
       })
-      const rr: any = r as any
-      const body = rr?.data?.data || rr?.data
-      const url = body?.url || body?.imageUrl
+      const url = extractUploadUrl(r)
       if (url) {
         setHospImage(url)
         flash('医院照片已上传，记得点保存')

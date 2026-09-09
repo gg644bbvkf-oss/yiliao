@@ -131,6 +131,7 @@ const BookingFormPage = () => {
       console.log('预约响应:', res.data)
       const body = res.data as any
       if (body?.code === 200 && body?.data) {
+        Taro.setStorageSync('hospital_user_phone', patientPhone)
         Taro.redirectTo({
           url: `/pages/appointment/booking-result?id=${body.data.id}`,
         })
