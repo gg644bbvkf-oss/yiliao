@@ -108,7 +108,6 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
   const [docTitle, setDocTitle] = useState('')
   const [docIntro, setDocIntro] = useState('')
   const [docAvatar, setDocAvatar] = useState('')
-  const [docDept, setDocDept] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [msg, setMsg] = useState('')
@@ -227,11 +226,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
 
   async function delDept(id: string) {
     const dep = deps.find((x) => x.id === id)
-    const docCount = doctors.filter((x) => x.departmentId === id).length
-    const tip =
-      docCount > 0
-        ? `科室「${dep?.name ?? ''}」下还有 ${docCount} 位医生，删除科室将同时删除这些医生，确定删除吗？`
-        : `确定删除科室「${dep?.name ?? ''}」吗？`
+    const tip = `确定删除科室「${dep?.name ?? ''}」吗？（医生独立管理，删除科室不会影响医生）`
     const ok = await new Promise<boolean>((resolve) => {
       Taro.showModal({
         title: '删除确认',
@@ -324,7 +319,6 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
     setDocTitle('')
     setDocIntro('')
     setDocAvatar('')
-    setDocDept('')
   }
 
   async function editDoctor(d: DoctorItem) {
@@ -333,7 +327,6 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
     setDocTitle(d.title || '')
     setDocIntro(d.introduction || '')
     setDocAvatar(d.avatar || '')
-    setDocDept(d.departmentId || '')
   }
 
   async function saveDoctor() {
@@ -343,7 +336,6 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
       title: docTitle,
       introduction: docIntro,
       avatar: docAvatar,
-      departmentId: docDept || undefined,
     }
     if (editingId) {
       await runWrite(async () => {
@@ -513,10 +505,6 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
               <Text className={labelCls}>简介</Text>
               <View className={inputWrap}>
                 <Textarea style={{ width: '100%', minHeight: 60 }} value={docIntro} onInput={(e) => setDocIntro(e.detail.value)} placeholder="医生简介" />
-              </View>
-              <Text className={labelCls}>所属科室</Text>
-              <View className={inputWrap}>
-                <Input style={{ width: '100%' }} value={docDept} onInput={(e) => setDocDept(e.detail.value)} placeholder="科室ID（可选）" />
               </View>
               <Text className={labelCls}>照片</Text>
               <View className="mb-2 flex items-center gap-3">

@@ -123,35 +123,23 @@ export class ContentService {
   }
 
   async deleteDepartment(id: string) {
-    // 级联删除该科室下的医生与号源设置（保留历史预约记录）
-    const { data: docs } = await this.client.from('doctors').select('id').eq('department_id', id);
-    if (docs && docs.length > 0) {
-      const { error: docErr } = await this.client
-        .from('doctors')
-        .delete()
-        .eq('department_id', id);
-      if (docErr) throw new HttpException(docErr.message, HttpStatus.BAD_GATEWAY);
-    }
+    // 删除科室不影响医生：医生与科室已解耦，保留所有医生（仅清理该科室的号源设置）
     await this.client.from('quota_settings').delete().eq('department_id', id);
     const { error } = await this.client.from('departments').delete().eq('id', id);
     if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
-    return { deleted: true, doctorCount: docs?.length ?? 0 };
+    return { deleted: true };
   }
 
   /* ---------- 医生增删改 ---------- */
   async createDoctor(body: any): Promise<any> {
     if (!body?.name) throw new HttpException('医生姓名不能为空', HttpStatus.BAD_REQUEST);
-    let departmentName = body.departmentName || '';
-    if (body.departmentId && !departmentName) {
-      const { data } = await this.client.from('departments').select('name').eq('id', body.departmentId).single();
-      departmentName = data?.name || '';
-    }
+    // 医生与科室解耦：新增医生不关联科室
     const { data, error } = await this.client
       .from('doctors')
       .insert({
         name: body.name,
-        department_id: body.departmentId || null,
-        department_name: departmentName,
+        department_id: null,
+        department_name: '',
         title: body.title || '',
         specialty: body.specialty || '',
         introduction: body.introduction || '',
@@ -167,8 +155,6 @@ export class ContentService {
   async updateDoctor(id: string, body: any): Promise<any> {
     const patch: any = {};
     if (body.name !== undefined) patch.name = body.name;
-    if (body.departmentId !== undefined) patch.department_id = body.departmentId;
-    if (body.departmentName !== undefined) patch.department_name = body.departmentName;
     if (body.title !== undefined) patch.title = body.title;
     if (body.specialty !== undefined) patch.specialty = body.specialty;
     if (body.introduction !== undefined) patch.introduction = body.introduction;
