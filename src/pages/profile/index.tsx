@@ -93,17 +93,41 @@ const ProfilePage = () => {
         method: 'GET',
       })
       console.log('admin check res:', JSON.stringify(res))
-      const isAdmin = res?.data?.data?.isAdmin
+      const status = res?.statusCode
+      const body = res?.data
+      // 判断后端是否可用：HTTP 200 且响应为 { code, msg, data } 信封格式
+      const backendOk = status === 200 && body && typeof body === 'object' && 'code' in body
+      if (!backendOk) {
+        // 网页版为纯静态托管（GitHub Pages），没有后端服务
+        Taro.showModal({
+          title: '管理后台暂不可用',
+          content: '当前网页版未连接后端服务，无法校验管理员身份与使用管理后台。请在微信小程序中登录管理后台。',
+          showCancel: false,
+          confirmText: '知道了',
+        })
+        return
+      }
+      const isAdmin = body?.data?.isAdmin
       if (isAdmin) {
         Taro.setStorageSync(ADMIN_PHONE_KEY, adminPhone.trim())
         setShowAdminLogin(false)
         Taro.navigateTo({ url: '/pages/profile/admin-mgmt' })
       } else {
-        Taro.showToast({ title: '该手机号不是管理员', icon: 'none' })
+        Taro.showModal({
+          title: '登录失败',
+          content: '该手机号不是管理员，请确认后重试。',
+          showCancel: false,
+          confirmText: '知道了',
+        })
       }
     } catch (e) {
       console.log('admin check error:', e)
-      Taro.showToast({ title: '识别失败，请重试', icon: 'none' })
+      Taro.showModal({
+        title: '识别失败',
+        content: '当前未连接到后端服务，请在微信小程序中登录管理后台。',
+        showCancel: false,
+        confirmText: '知道了',
+      })
     } finally {
       setAdminChecking(false)
     }
