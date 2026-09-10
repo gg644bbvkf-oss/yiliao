@@ -396,6 +396,28 @@ const BookingFormPage = () => {
           </Text>
         </Button>
       </View>
+
+      {/* 预约挂号说明 */}
+      <View className="px-5 pb-8">
+        <View className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-4">
+          <Text className="block text-sm font-bold text-orange-800 mb-2">重要提示</Text>
+          <Text className="block text-xs leading-relaxed text-gray-600 mb-2">
+            （一）实名制就医：就诊时必须携带患者本人有效身份证件进行验证。人、证、预约信息不符者，将无法正常就诊。
+          </Text>
+          <Text className="block text-xs leading-relaxed text-gray-600 mb-2">
+            （二）中医门诊坐诊时间：周一至周五早上8：30-12：00（节假日除外）。
+          </Text>
+          <Text className="block text-xs leading-relaxed text-gray-600 mb-2">
+            （三）费用说明：我院网上预约号均不收取任何费用，如遇卖号代排牟利行为请及时联系院方，联系电话：029-37111120。
+          </Text>
+          <Text className="block text-xs leading-relaxed text-gray-600 mb-2">
+            （四）特殊紧急情况：网上预约号仅为当天就诊凭证，就医前请电话与医院联系确认。如遇特殊突发情况，院方会及时通过服务号及电话等方式联系患者，取消预约。如未及时接听电话或关注留言信息，所造成的一切后果医院不承担任何责任。请广大就医朋友及家属遵守医院医疗秩序，给您带来的不便敬请谅解。
+          </Text>
+          <Text className="block text-xs leading-relaxed text-gray-600">
+            （五）就诊次序：就诊次序按照一个现场号一个预约号交替进行，请广大就诊朋友一起维护文明、和谐的医疗秩序。
+          </Text>
+        </View>
+      </View>
     </ScrollView>
   )
 }
