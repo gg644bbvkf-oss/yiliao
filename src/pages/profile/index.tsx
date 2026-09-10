@@ -150,10 +150,10 @@ const ProfilePage = () => {
           </View>
           {userPhone ? (
             <View
-              className="flex flex-row items-center gap-2 bg-white rounded-full px-3 py-2 active:opacity-80"
+              className="flex flex-row items-center gap-2 bg-white rounded-full px-4 py-2 active:opacity-80"
               onClick={handleUserLogout}
             >
-              <Text className="text-xs text-white block">退出</Text>
+              <Text className="text-sm font-bold text-teal-700 block">退出登录</Text>
             </View>
           ) : (
             <View
