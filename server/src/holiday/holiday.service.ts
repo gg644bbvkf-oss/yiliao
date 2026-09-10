@@ -107,11 +107,18 @@ function computeLegalHolidays(fromDate: Date): HolidayRow[] {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+/** 判断某公历日期是否为双休日（周六/周日） */
+function isWeekend(dateStr: string): boolean {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay(); // 0=周日 6=周六
+  return day === 0 || day === 6;
+}
+
 @Injectable()
 export class HolidayService {
   private table = 'holidays';
 
-  /** 查询某日是否全院节假日 */
+  /** 查询某日是否全院节假日（含双休日默认停诊） */
   async getHolidayDate(date: string): Promise<HolidayRow | null> {
     const client = getSupabaseClient();
     const { data, error } = await client
@@ -120,12 +127,19 @@ export class HolidayService {
       .eq('date', date)
       .maybeSingle();
     if (error) throw new Error(`查询节假日失败: ${error.message}`);
-    if (!data) return null;
-    const row = data as any;
-    return { date: row.date, name: row.name || '', isHoliday: !!row.is_holiday, source: row.source };
+    // DB 记录优先：管理员可手动将日期改回"正常接诊"（is_holiday=false），覆盖法定与双休默认
+    if (data) {
+      const row = data as any;
+      return { date: row.date, name: row.name || '', isHoliday: !!row.is_holiday, source: row.source };
+    }
+    // 无自定义记录时：双休日默认全院停诊（号源为 0）
+    if (isWeekend(date)) {
+      return { date, name: '周末休息', isHoliday: true, source: 'auto' };
+    }
+    return null;
   }
 
-  /** 查询多个日期的节假日记录 */
+  /** 查询多个日期的节假日记录（含双休日默认停诊；DB 记录优先） */
   async listHolidays(dates: string[]): Promise<HolidayRow[]> {
     if (!dates.length) return [];
     const client = getSupabaseClient();
@@ -134,12 +148,23 @@ export class HolidayService {
       .select('*')
       .in('date', dates);
     if (error) throw new Error(`查询节假日失败: ${error.message}`);
-    return (data ?? []).map((r: any) => ({
-      date: r.date,
-      name: r.name || '',
-      isHoliday: !!r.is_holiday,
-      source: r.source,
-    }));
+    const byDate = new Map<string, any>((data ?? []).map((r: any) => [r.date, r]));
+    // 合并双休默认：无 DB 记录（未被管理员改回正常接诊）的周六/周日视为周末休息
+    return dates.map((date) => {
+      const existing = byDate.get(date);
+      if (existing) {
+        return {
+          date: existing.date,
+          name: existing.name || '',
+          isHoliday: !!existing.is_holiday,
+          source: existing.source,
+        };
+      }
+      if (isWeekend(date)) {
+        return { date, name: '周末休息', isHoliday: true, source: 'auto' };
+      }
+      return { date, name: '', isHoliday: false, source: 'auto' };
+    });
   }
 
   /** 设置某日为节假日 / 改回正常接诊（全院生效，upsert） */
