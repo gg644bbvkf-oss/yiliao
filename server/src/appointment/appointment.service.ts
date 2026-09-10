@@ -20,6 +20,8 @@ export interface Appointment {
 
 const DEFAULT_MORNING_QUOTA = 20;
 const DEFAULT_AFTERNOON_QUOTA = 15;
+/** 全院统一号源标识：不区分科室，所有科室共用一份全院号源 */
+const GLOBAL_DEPT_ID = 'GLOBAL';
 
 @Injectable()
 export class AppointmentService {
@@ -27,13 +29,12 @@ export class AppointmentService {
 
   constructor(private readonly holidayService: HolidayService) {}
 
-  /** 查询某科室某时段已预约数 */
-  private async countBooked(departmentId: string, date: string, timeSlot: string): Promise<number> {
+  /** 查询某日期某时段全院已预约数（不区分科室） */
+  private async countBooked(_departmentId: string, date: string, timeSlot: string): Promise<number> {
     const client = getSupabaseClient();
     const { count, error } = await client
       .from(this.table)
       .select('*', { count: 'exact', head: true })
-      .eq('department_id', departmentId)
       .eq('date', date)
       .eq('time_slot', timeSlot)
       .neq('status', 'cancelled');
@@ -41,20 +42,20 @@ export class AppointmentService {
     return count ?? 0;
   }
 
-  /** 获取某科室某日号源设置 */
-  private async getQuota(departmentId: string, departmentName: string, date: string) {
+  /** 获取全院统一号源设置（不区分科室） */
+  private async getQuota(_departmentId: string, departmentName: string, date: string) {
     const client = getSupabaseClient();
     const { data, error } = await client
       .from('quota_settings')
       .select('*')
-      .eq('department_id', departmentId)
+      .eq('department_id', GLOBAL_DEPT_ID)
       .eq('date', date)
       .maybeSingle();
     if (error) throw new Error(`查询号源失败: ${error.message}`);
     if (data) {
       const row = data as any;
       return {
-        departmentId,
+        departmentId: GLOBAL_DEPT_ID,
         departmentName,
         date,
         morningQuota: row.morning_quota,
@@ -63,7 +64,7 @@ export class AppointmentService {
       };
     }
     return {
-      departmentId,
+      departmentId: GLOBAL_DEPT_ID,
       departmentName,
       date,
       morningQuota: DEFAULT_MORNING_QUOTA,

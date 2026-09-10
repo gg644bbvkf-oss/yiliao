@@ -266,25 +266,6 @@ export default function AdminMgmt() {
     }
   }
 
-  const handleSaveInitial = async (deptId: string, date: string) => {
-    const dept = deptList.find((d) => d.id === deptId)
-    await unwrap(
-      Network.request({
-        url: '/api/admin/quota',
-        method: 'POST',
-        data: {
-          departmentId: deptId,
-          departmentName: dept?.name || '',
-          date,
-          morningQuota: Number(morning) || 0,
-          afternoonQuota: Number(afternoon) || 0,
-          isHoliday,
-        },
-      }),
-    )
-    await loadQuota(deptId, date)
-  }
-
   const handleAddBlack = async () => {
     if (!bkName || !bkIdCard) return
     await unwrap(
@@ -306,7 +287,6 @@ export default function AdminMgmt() {
   }
 
   const filtered = appts.filter((a) => a.date === selDate && a.status !== 'cancelled')
-  const isTodayQuota = selQuotaDate === dates[0].date
 
   if (!loggedIn) {
     return (
@@ -500,7 +480,7 @@ export default function AdminMgmt() {
             </View>
 
             <View className="bg-white rounded-2xl p-4 mt-3 shadow-sm">
-              <Text className="block text-base font-semibold mb-3">号源数量设置（按科室）</Text>
+              <Text className="block text-base font-semibold mb-3">全院号源数量设置（统一号源）</Text>
               <View className={`flex flex-row gap-3 mb-3 ${isHoliday ? 'opacity-40' : ''}`}>
                 <View className="flex-1">
                   <Text className="block text-sm text-gray-500 mb-1">上午号源（08:00-12:00）</Text>
@@ -526,16 +506,8 @@ export default function AdminMgmt() {
                 onClick={handleSaveQuota}
                 disabled={isHoliday}
               >
-                <Text>{isHoliday ? '节假日停诊中' : '保存该科室号源'}</Text>
+                <Text>{isHoliday ? '节假日停诊中' : '保存全院号源'}</Text>
               </Button>
-              {!isTodayQuota && !isHoliday && (
-                <Button
-                  className="w-full mt-2 bg-sky-500"
-                  onClick={() => handleSaveInitial(selDeptId, selQuotaDate)}
-                >
-                  <Text>将该号源数量应用到全部科室该日期</Text>
-                </Button>
-              )}
             </View>
           </TabsContent>
 

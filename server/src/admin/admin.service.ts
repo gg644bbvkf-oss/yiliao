@@ -24,6 +24,9 @@ export interface BlacklistEntry {
 export class AdminService {
   constructor(private readonly holidayService: HolidayService) {}
 
+  /** 全院统一号源标识：不区分科室，所有科室共用一份全院号源 */
+  private static readonly GLOBAL_DEPT_ID = 'GLOBAL';
+
   /** 管理员识别：按手机号检查是否管理员 */
   async isAdmin(phone: string): Promise<boolean> {
     const client = getSupabaseClient();
@@ -35,13 +38,12 @@ export class AdminService {
     return (count ?? 0) > 0;
   }
 
-  /** 统计某科室各日期的时段预约数 */
-  async getBookedStats(departmentId: string, dates: string[]): Promise<Record<string, { 上午: number; 下午: number }>> {
+  /** 统计全院各日期的时段预约数（不区分科室） */
+  async getBookedStats(_departmentId: string, dates: string[]): Promise<Record<string, { 上午: number; 下午: number }>> {
     const client = getSupabaseClient();
     const { data, error } = await client
       .from('appointments')
       .select('date, time_slot')
-      .eq('department_id', departmentId)
       .in('date', dates)
       .neq('status', 'cancelled');
     if (error) throw new Error(`统计预约失败: ${error.message}`);
@@ -57,12 +59,12 @@ export class AdminService {
 
   /** 号源查询：未来N天的每日号源 + 剩余。
    *  全院节假日（holidays 表）优先级最高：节假日当天上/下午号源统一为 0。 */
-  async listQuota(departmentId: string, departmentName: string, dates: string[], booked: Record<string, { 上午: number; 下午: number }>) {
+  async listQuota(_departmentId: string, departmentName: string, dates: string[], booked: Record<string, { 上午: number; 下午: number }>) {
     const client = getSupabaseClient();
     const { data, error } = await client
       .from('quota_settings')
       .select('*')
-      .eq('department_id', departmentId)
+      .eq('department_id', AdminService.GLOBAL_DEPT_ID)
       .in('date', dates);
     if (error) throw new Error(`查询号源失败: ${error.message}`);
     const setMap = new Map<string, any>((data ?? []).map((r: any) => [r.date, r]));
@@ -109,12 +111,12 @@ export class AdminService {
     const existing = await client
       .from('quota_settings')
       .select('*')
-      .eq('department_id', input.departmentId)
+      .eq('department_id', AdminService.GLOBAL_DEPT_ID)
       .eq('date', input.date)
       .maybeSingle();
     if (existing.error) throw new Error(`查询号源失败: ${existing.error.message}`);
     const payload = {
-      department_id: input.departmentId,
+      department_id: AdminService.GLOBAL_DEPT_ID,
       department_name: input.departmentName,
       date: input.date,
       morning_quota: input.isHoliday ? 0 : input.morningQuota,
@@ -131,19 +133,19 @@ export class AdminService {
     return res.data;
   }
 
-  /** 批量设置未来默认号源 */
-  async ensureQuotaForRange(departmentId: string, departmentName: string, dates: string[]) {
+  /** 批量设置未来默认号源（全院统一） */
+  async ensureQuotaForRange(_departmentId: string, _departmentName: string, dates: string[]) {
     const client = getSupabaseClient();
     const { data, error } = await client
       .from('quota_settings')
       .select('*')
-      .eq('department_id', departmentId)
+      .eq('department_id', AdminService.GLOBAL_DEPT_ID)
       .in('date', dates);
     if (error) throw new Error(`查询号源失败: ${error.message}`);
     const existing = new Set((data ?? []).map((r: any) => r.date));
     const toInsert = dates.filter((d) => !existing.has(d)).map((date) => ({
-      department_id: departmentId,
-      department_name: departmentName,
+      department_id: AdminService.GLOBAL_DEPT_ID,
+      department_name: '全院统一号源',
       date,
       morning_quota: 10,
       afternoon_quota: 5,
