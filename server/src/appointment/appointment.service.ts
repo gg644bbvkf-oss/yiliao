@@ -54,12 +54,15 @@ export class AppointmentService {
     if (error) throw new Error(`查询号源失败: ${error.message}`);
     if (data) {
       const row = data as any;
+      // 防御：非节假日但号源为 0（节假日停诊时写 0、恢复接诊后未改回号源的历史脏数据），回落默认号源
+      const morning = Number(row.morning_quota) > 0 ? Number(row.morning_quota) : DEFAULT_MORNING_QUOTA;
+      const afternoon = Number(row.afternoon_quota) > 0 ? Number(row.afternoon_quota) : DEFAULT_AFTERNOON_QUOTA;
       return {
         departmentId: GLOBAL_DEPT_ID,
         departmentName,
         date,
-        morningQuota: row.morning_quota,
-        afternoonQuota: row.afternoon_quota,
+        morningQuota: morning,
+        afternoonQuota: afternoon,
         isHoliday: row.is_holiday,
       };
     }

@@ -88,8 +88,8 @@ export class AdminService {
           holidayName: global?.name || '节假日停诊',
         };
       }
-      const morning = set?.morning_quota ?? 20;
-      const afternoon = set?.afternoon_quota ?? 15;
+      const morning = (Number(set?.morning_quota) > 0 ? Number(set.morning_quota) : 10);
+      const afternoon = (Number(set?.afternoon_quota) > 0 ? Number(set.afternoon_quota) : 5);
       return {
         date,
         morningQuota: morning,
@@ -115,12 +115,15 @@ export class AdminService {
       .eq('date', input.date)
       .maybeSingle();
     if (existing.error) throw new Error(`查询号源失败: ${existing.error.message}`);
+    // 正常接诊日：号源未填写/为 0（常见于节假日恢复接诊后未重新设置）时回落默认号源，避免显示"已满"
+    const normalMorning = Number(input.morningQuota) > 0 ? Number(input.morningQuota) : 10;
+    const normalAfternoon = Number(input.afternoonQuota) > 0 ? Number(input.afternoonQuota) : 5;
     const payload = {
       department_id: AdminService.GLOBAL_DEPT_ID,
       department_name: input.departmentName,
       date: input.date,
-      morning_quota: input.isHoliday ? 0 : input.morningQuota,
-      afternoon_quota: input.isHoliday ? 0 : input.afternoonQuota,
+      morning_quota: input.isHoliday ? 0 : normalMorning,
+      afternoon_quota: input.isHoliday ? 0 : normalAfternoon,
       is_holiday: input.isHoliday,
     };
     let res;

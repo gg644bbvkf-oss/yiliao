@@ -118,8 +118,9 @@ export default function AdminMgmt() {
     const rows: QuotaInfo[] = data?.rows || data || []
     const row = rows.find((r) => r.date === date)
     if (row) {
-      setMorning(String(row.morningQuota))
-      setAfternoon(String(row.afternoonQuota))
+      // 非节假日但号源为 0（节假日恢复接诊遗留）时，回填默认号源，避免保存后显示"已满"
+      setMorning(row.isHoliday ? '0' : (Number(row.morningQuota) > 0 ? String(row.morningQuota) : '10'))
+      setAfternoon(row.isHoliday ? '0' : (Number(row.afternoonQuota) > 0 ? String(row.afternoonQuota) : '5'))
       setIsHoliday(!!row.isHoliday)
     } else {
       // 该日期无记录时回落到默认号源：上午10、下午5
@@ -469,7 +470,15 @@ export default function AdminMgmt() {
                   size="sm"
                   variant={isHoliday ? 'default' : 'outline'}
                   className={cn(isHoliday ? 'bg-amber-500' : '')}
-                  onClick={() => setIsHoliday(!isHoliday)}
+                  onClick={() => {
+                    const next = !isHoliday
+                    setIsHoliday(next)
+                    // 切回"正常接诊"时，若号源为 0（节假日遗留），重置为默认号源
+                    if (!next) {
+                      if (Number(morning) <= 0) setMorning('10')
+                      if (Number(afternoon) <= 0) setAfternoon('5')
+                    }
+                  }}
                 >
                   <Text className="text-xs">{isHoliday ? '节假日停诊' : '正常接诊'}</Text>
                 </Button>
