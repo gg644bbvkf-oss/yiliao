@@ -29,9 +29,18 @@ const MyAppointmentsPage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchAppointments = useCallback(() => {
+  const loader = useCallback(() => {
     setLoading(true)
-    Network.request({ url: '/api/appointments' })
+    const loginPhone = (Taro.getStorageSync('hospital_user_phone') || '') as string
+    // 未登录时展示空态
+    if (!loginPhone) {
+      setAppointments([])
+      setLoading(false)
+      return
+    }
+    Network.request({
+      url: `/api/appointments?phone=${encodeURIComponent(loginPhone)}`,
+    })
       .then((res: any) => {
         console.log('获取预约列表:', res.data)
         setAppointments(res.data?.data?.list || [])
@@ -43,8 +52,8 @@ const MyAppointmentsPage = () => {
   }, [])
 
   useEffect(() => {
-    fetchAppointments()
-  }, [fetchAppointments])
+    loader()
+  }, [loader])
 
   const handleCancel = useCallback(
     (aptId: string) => {
@@ -64,7 +73,7 @@ const MyAppointmentsPage = () => {
               .then((cancelRes: any) => {
                 console.log('取消预约响应:', cancelRes.data)
                 if (cancelRes.data?.code === 200) {
-                  fetchAppointments()
+                  loader()
                   Taro.showToast({ title: '已取消预约', icon: 'success' })
                 }
               })
@@ -76,7 +85,7 @@ const MyAppointmentsPage = () => {
         },
       })
     },
-    [fetchAppointments],
+    [loader],
   )
 
   if (loading) {

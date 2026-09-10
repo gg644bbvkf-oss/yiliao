@@ -89,23 +89,6 @@ const IndexPage = () => {
         <Text className="block text-sm text-teal-100 mt-1 text-center">守护您和家人的健康</Text>
       </View>
 
-      {/* 预约挂号大按钮（置顶突出，橙色底 + 红色箭头） */}
-      <View className="px-4 -mt-2">
-        <View
-          className="rounded-2xl px-5 py-4 flex flex-row items-center justify-between shadow-md mt-3 active:opacity-90"
-          style={{ backgroundColor: '#F97316' }}
-          onClick={handleGoAppointment}
-        >
-          <View>
-            <Text className="block text-xl font-bold text-white">在线预约挂号</Text>
-            <Text className="block text-sm text-orange-100 mt-1">全科 · 中医 · 住院，免排队，便捷就诊</Text>
-          </View>
-          <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
-            <ArrowRight size={26} color="#EF4444" strokeWidth={2.5} />
-          </View>
-        </View>
-      </View>
-
       {/* 医院图片 */}
       <View className="px-4 mt-4">
         <Card className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -117,6 +100,23 @@ const IndexPage = () => {
             </View>
           )}
         </Card>
+      </View>
+
+      {/* 预约挂号大按钮（照片下方·概况上方，加大 + 红色边框） */}
+      <View className="px-4 mt-4">
+        <View
+          className="rounded-2xl px-6 py-5 flex flex-row items-center justify-between shadow-lg active:opacity-90"
+          style={{ backgroundColor: '#F97316', border: '3px solid #EF4444', boxShadow: '0 4px 14px rgba(239,68,68,0.35)' }}
+          onClick={handleGoAppointment}
+        >
+          <View className="flex-1">
+            <Text className="block text-2xl font-extrabold text-white">在线预约挂号</Text>
+            <Text className="block text-base text-orange-100 mt-2">全科 · 中医 · 住院，免排队，便捷就诊</Text>
+          </View>
+          <View className="w-12 h-12 rounded-full bg-white flex items-center justify-center flex-shrink-0 ml-3">
+            <ArrowRight size={30} color="#EF4444" strokeWidth={2.5} />
+          </View>
+        </View>
       </View>
 
       {/* 数据统计 */}

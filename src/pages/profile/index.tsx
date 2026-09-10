@@ -3,11 +3,11 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import {
   User,
+  UserRound,
   CalendarClock,
   Heart,
   Users,
   ChevronRight,
-  Settings,
   ShieldCheck,
 } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
@@ -36,6 +36,9 @@ const ProfilePage = () => {
   const [adminPhone, setAdminPhone] = useState('')
   const [adminChecking, setAdminChecking] = useState(false)
   const [userPhone, setUserPhone] = useState(() => Taro.getStorageSync(USER_PHONE_KEY) || '')
+  const [showUserLogin, setShowUserLogin] = useState(false)
+  const [userLoginPhone, setUserLoginPhone] = useState('')
+  
 
   const refreshCounts = useCallback(() => {
     setPatientCount(getPatients().length)
@@ -55,6 +58,15 @@ const ProfilePage = () => {
   const handleMenuClick = (item: typeof menuItems[0]) => {
     if (item.name === '我的收藏') {
       setShowFavorites(!showFavorites)
+    } else if (item.name === '我的预约') {
+      // 我的预约需登录后查看（仅显示当前登录手机号的预约）
+      const saved = Taro.getStorageSync(USER_PHONE_KEY)
+      if (saved) {
+        Taro.navigateTo({ url: item.page })
+      } else {
+        Taro.showToast({ title: '请先登录', icon: 'none' })
+        setShowUserLogin(true)
+      }
     } else if ((item as any).admin) {
       // 管理员功能需验证身份
       const saved = Taro.getStorageSync(ADMIN_PHONE_KEY)
@@ -97,6 +109,27 @@ const ProfilePage = () => {
     }
   }
 
+  // 用户身份验证：输入手机号登录
+  const handleUserLogin = () => {
+    const phone = userLoginPhone.trim()
+    if (!/^1\d{10}$/.test(phone)) {
+      Taro.showToast({ title: '请输入正确的11位手机号', icon: 'none' })
+      return
+    }
+    Taro.setStorageSync(USER_PHONE_KEY, phone)
+    setUserPhone(phone)
+    setShowUserLogin(false)
+    setUserLoginPhone('')
+    Taro.showToast({ title: '登录成功', icon: 'success' })
+  }
+
+  // 退出登录
+  const handleUserLogout = () => {
+    Taro.removeStorageSync(USER_PHONE_KEY)
+    setUserPhone('')
+    Taro.showToast({ title: '已退出登录', icon: 'none' })
+  }
+
   const counts = [patientCount, appointmentCount, favoriteCount]
 
   const favoriteArticles = healthArticles.filter((a) =>
@@ -115,7 +148,22 @@ const ProfilePage = () => {
             <Text className="text-xl font-bold text-white block">{userPhone || '居民用户'}</Text>
             <Text className="text-sm text-teal-100 block mt-1">旬邑县城关镇卫生院为您服务</Text>
           </View>
-          <Settings size={22} color="#ffffff" />
+          {userPhone ? (
+            <View
+              className="flex flex-row items-center gap-2 bg-white rounded-full px-3 py-2 active:opacity-80"
+              onClick={handleUserLogout}
+            >
+              <Text className="text-xs text-white block">退出</Text>
+            </View>
+          ) : (
+            <View
+              className="flex flex-row items-center gap-2 bg-white rounded-full px-4 py-2 active:opacity-80"
+              onClick={() => setShowUserLogin(true)}
+            >
+              <UserRound size={18} color="#0D9488" />
+              <Text className="text-sm font-bold text-teal-700 block">登录</Text>
+            </View>
+          )}
         </View>
       </View>
 
@@ -324,6 +372,58 @@ const ProfilePage = () => {
                   {adminChecking ? '验证中...' : '进入后台'}
                 </Button>
               </View>
+            </View>
+          </View>
+        </View>
+      )}
+      {showUserLogin && (
+        <View
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 200,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 32px',
+          }}
+          onClick={() => setShowUserLogin(false)}
+        >
+          <View
+            className="bg-white rounded-2xl w-full"
+            style={{ maxWidth: 360 }}
+            onClick={(e: any) => e.stopPropagation()}
+          >
+            <View className="p-6">
+              <View className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
+                <UserRound size={24} color="#2563EB" />
+              </View>
+              <Text className="text-lg font-bold text-slate-800 block">
+                手机号登录
+              </Text>
+              <Text className="text-sm text-slate-500 block mt-1 mb-4">
+                请输入手机号码，用于查看你的预约记录
+              </Text>
+              <View className="bg-gray-50 rounded-xl px-4 py-3 mb-4">
+                <Input
+                  className="w-full bg-transparent"
+                  placeholder="请输入11位手机号"
+                  value={userLoginPhone}
+                  onInput={(e: any) => setUserLoginPhone(e.detail.value)}
+                />
+              </View>
+              <Button
+                className="w-full h-11 bg-blue-600 text-white rounded-xl"
+                disabled={!userLoginPhone}
+                onClick={() => handleUserLogin()}
+              >
+                确认登录
+              </Button>
             </View>
           </View>
         </View>
