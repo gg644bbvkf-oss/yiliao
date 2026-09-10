@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { HolidayService } from '@/holiday/holiday.service';
 
 export interface QuotaSetting {
   id?: string;
@@ -21,6 +22,8 @@ export interface BlacklistEntry {
 
 @Injectable()
 export class AdminService {
+  constructor(private readonly holidayService: HolidayService) {}
+
   /** 管理员识别：按手机号检查是否管理员 */
   async isAdmin(phone: string): Promise<boolean> {
     const client = getSupabaseClient();
@@ -52,7 +55,8 @@ export class AdminService {
     return map;
   }
 
-  /** 号源查询：未来N天的每日号源 + 剩余 */
+  /** 号源查询：未来N天的每日号源 + 剩余。
+   *  全院节假日（holidays 表）优先级最高：节假日当天上/下午号源统一为 0。 */
   async listQuota(departmentId: string, departmentName: string, dates: string[], booked: Record<string, { 上午: number; 下午: number }>) {
     const client = getSupabaseClient();
     const { data, error } = await client
@@ -63,24 +67,44 @@ export class AdminService {
     if (error) throw new Error(`查询号源失败: ${error.message}`);
     const setMap = new Map<string, any>((data ?? []).map((r: any) => [r.date, r]));
 
+    // 全院节假日（含自动法定节假日与管理员手动调整）
+    const globalHolidays = await this.holidayService.listHolidays(dates);
+
     return dates.map((date) => {
       const set = setMap.get(date);
+      const global = globalHolidays.find((h) => h.date === date);
+      const isHoliday = (global && global.isHoliday) || (!!set?.is_holiday && !global);
+      const b = booked[date] || { 上午: 0, 下午: 0 };
+      if (isHoliday) {
+        return {
+          date,
+          morningQuota: 0,
+          afternoonQuota: 0,
+          morningLeft: 0,
+          afternoonLeft: 0,
+          isHoliday: true,
+          holidayName: global?.name || '节假日停诊',
+        };
+      }
       const morning = set?.morning_quota ?? 20;
       const afternoon = set?.afternoon_quota ?? 15;
-      const b = booked[date] || { 上午: 0, 下午: 0 };
       return {
         date,
         morningQuota: morning,
         afternoonQuota: afternoon,
         morningLeft: Math.max(0, morning - b['上午']),
         afternoonLeft: Math.max(0, afternoon - b['下午']),
-        isHoliday: set?.is_holiday ?? false,
+        isHoliday: false,
       };
     });
   }
 
-  /** 设置号源（upsert） */
+  /** 设置号源（upsert）。
+   *  节假日标记同时写入全院 holidays 表（全院生效），普通号源只写科室 quota_settings。 */
   async setQuota(input: QuotaSetting) {
+    // 1. 全院节假日同步（无论是否传 departmentId，节假日都是全院概念）
+    await this.holidayService.setHoliday(input.date, input.isHoliday, input.isHoliday ? '节假日停诊' : '', 'manual');
+
     const client = getSupabaseClient();
     const existing = await client
       .from('quota_settings')
@@ -93,8 +117,8 @@ export class AdminService {
       department_id: input.departmentId,
       department_name: input.departmentName,
       date: input.date,
-      morning_quota: input.morningQuota,
-      afternoon_quota: input.afternoonQuota,
+      morning_quota: input.isHoliday ? 0 : input.morningQuota,
+      afternoon_quota: input.isHoliday ? 0 : input.afternoonQuota,
       is_holiday: input.isHoliday,
     };
     let res;

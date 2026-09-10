@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { HolidayService } from '@/holiday/holiday.service';
 
 export interface Appointment {
   id: string;
@@ -23,6 +24,8 @@ const DEFAULT_AFTERNOON_QUOTA = 15;
 @Injectable()
 export class AppointmentService {
   private table = 'appointments';
+
+  constructor(private readonly holidayService: HolidayService) {}
 
   /** 查询某科室某时段已预约数 */
   private async countBooked(departmentId: string, date: string, timeSlot: string): Promise<number> {
@@ -80,16 +83,27 @@ export class AppointmentService {
     return (count ?? 0) > 0;
   }
 
-  /** 获取某科室某日号源设置（含 isHoliday），供控制器取节假日标识 */
+  /** 获取某科室某日号源设置（含 isHoliday），供控制器取节假日标识。
+   *  全院节假日（holidays 表）优先级最高：节假日当天号源统一视为 0、停诊。 */
   async getQuotaPublic(departmentId: string, departmentName: string, date: string) {
-    return this.getQuota(departmentId, departmentName, date);
+    const holiday = await this.holidayService.getHolidayDate(date);
+    if (holiday && holiday.isHoliday) {
+      return { departmentId, departmentName, date, morningQuota: 0, afternoonQuota: 0, isHoliday: true, holidayName: holiday.name };
+    }
+    const quota = await this.getQuota(departmentId, departmentName, date);
+    return { ...quota, isHoliday: false };
   }
 
   /**
    * 检查号源是否充足（返回剩余号源）
-   * 返回 { ok, remaining }
+   * 返回 { ok, remaining, total }
+   * 全院节假日当天：所有科室号源均为 0 且不可约。
    */
   async checkQuota(departmentId: string, departmentName: string, date: string, timeSlot: string) {
+    const holiday = await this.holidayService.getHolidayDate(date);
+    if (holiday && holiday.isHoliday) {
+      return { ok: false, reason: '该日期为节假日，暂停接诊', remaining: 0, total: 0 };
+    }
     const quota = await this.getQuota(departmentId, departmentName, date);
     if (quota.isHoliday) {
       return { ok: false, reason: '该日期为节假日，暂停接诊', remaining: 0 };

@@ -16,6 +16,7 @@ interface SlotData {
   morningQuota: number
   afternoonQuota: number
   isHoliday?: boolean
+  holidayName?: string
 }
 
 const genDates = (): string[] => {
@@ -77,6 +78,15 @@ const BookingFormPage = () => {
   const handleSubmit = async () => {
     if (!departmentId) {
       Taro.showToast({ title: '科室参数缺失', icon: 'none' })
+      return
+    }
+    if (slot.isHoliday) {
+      Taro.showToast({ title: '当日为节假日停诊，暂不可预约', icon: 'none' })
+      return
+    }
+    const left = period === '上午' ? slot.morningLeft : slot.afternoonLeft
+    if (left <= 0) {
+      Taro.showToast({ title: '该时段号源已约满，请换个时段或日期', icon: 'none' })
       return
     }
     if (!patientName.trim()) {
@@ -217,44 +227,67 @@ const BookingFormPage = () => {
 
       {/* 选择时段 */}
       <View className="px-4 mt-4">
-        <Text className="text-sm text-slate-600 block mb-2">选择就诊时段</Text>
-        <View className="flex flex-row gap-3">
-          {(['上午', '下午'] as const).map((p) => (
-            <View key={p} className="flex-1">
-              <View
-                className={`rounded-xl p-4 active:opacity-80 ${
-                  period === p ? 'bg-teal-600' : 'bg-white border border-slate-200'
-                }`}
-                onClick={() => setPeriod(p)}
-              >
-                <View className="flex flex-row items-center gap-1">
-                  <Clock size={14} color={period === p ? '#ffffff' : '#0D9488'} />
-                  <Text
-                    className={`text-base font-semibold block ${
-                      period === p ? 'text-white' : 'text-slate-800'
-                    }`}
-                  >
-                    {p}
-                  </Text>
-                </View>
-                <Text
-                  className={`text-xs block mt-1 ${
-                    period === p ? 'text-teal-100' : 'text-slate-400'
-                  }`}
-                >
-                  {p === '上午' ? '8:00-11:30' : '14:00-17:00'}
-                </Text>
-                <Text
-                  className={`text-xs block mt-1 ${
-                    period === p ? 'text-teal-100' : 'text-orange-500'
-                  }`}
-                >
-                  剩余 {leftOfPeriod(p)} / {quotaOfPeriod(p)} 个号
-                </Text>
-              </View>
+        {slot.isHoliday ? (
+          <View className="rounded-xl bg-red-50 border border-red-200 p-5 flex items-center">
+            <Text className="block text-base font-semibold text-red-600 text-center w-full">
+              {slot.holidayName ? `${slot.holidayName} · ` : ''}节假日停诊
+            </Text>
+            <Text className="block text-sm text-red-400 text-center w-full mt-1">
+              当日不开放预约挂号，请选择其他日期或电话咨询
+            </Text>
+          </View>
+        ) : (
+          <>
+            <Text className="text-sm text-slate-600 block mb-2">选择就诊时段</Text>
+            <View className="flex flex-row gap-3">
+              {(['上午', '下午'] as const).map((p) => {
+                const left = leftOfPeriod(p)
+                const full = left <= 0
+                return (
+                  <View key={p} className="flex-1">
+                    <View
+                      className={`rounded-xl p-4 active:opacity-80 ${
+                        full
+                          ? 'bg-slate-100 border border-slate-200'
+                          : period === p
+                            ? 'bg-teal-600'
+                            : 'bg-white border border-slate-200'
+                      }`}
+                      onClick={() => {
+                        if (!full) setPeriod(p)
+                      }}
+                    >
+                      <View className="flex flex-row items-center gap-1">
+                        <Clock size={14} color={full ? '#94a3b8' : period === p ? '#ffffff' : '#0D9488'} />
+                        <Text
+                          className={`text-base font-semibold block ${
+                            full ? 'text-slate-400' : period === p ? 'text-white' : 'text-slate-800'
+                          }`}
+                        >
+                          {p}
+                        </Text>
+                      </View>
+                      <Text
+                        className={`text-xs block mt-1 ${
+                          full ? 'text-slate-400' : period === p ? 'text-teal-100' : 'text-slate-400'
+                        }`}
+                      >
+                        {p === '上午' ? '8:00-11:30' : '14:00-17:00'}
+                      </Text>
+                      <Text
+                        className={`text-xs block mt-1 ${
+                          full ? 'text-slate-400' : period === p ? 'text-teal-100' : 'text-orange-500'
+                        }`}
+                      >
+                        {full ? '号源已约满' : `剩余 ${left} / ${quotaOfPeriod(p)} 个号`}
+                      </Text>
+                    </View>
+                  </View>
+                )
+              })}
             </View>
-          ))}
-        </View>
+          </>
+        )}
       </View>
 
       {/* 快速选择就诊人 */}

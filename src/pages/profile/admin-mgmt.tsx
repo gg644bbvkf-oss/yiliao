@@ -479,37 +479,61 @@ export default function AdminMgmt() {
             </View>
 
             <View className="bg-white rounded-2xl p-4 mt-3 shadow-sm">
-              <Text className="block text-base font-semibold mb-3">号源数量设置</Text>
-              <View className="flex flex-row gap-3 mb-3">
-                <View className="flex-1">
-                  <Text className="block text-sm text-gray-500 mb-1">上午号源（08:00-12:00）</Text>
-                  <Input type="number" value={morning} onInput={(e: any) => setMorning(e.detail.value)} />
-                </View>
-                <View className="flex-1">
-                  <Text className="block text-sm text-gray-500 mb-1">下午号源（14:00-17:00）</Text>
-                  <Input type="number" value={afternoon} onInput={(e: any) => setAfternoon(e.detail.value)} />
-                </View>
-              </View>
+              <Text className="block text-base font-semibold mb-1">节假日设置（全院生效）</Text>
+              <Text className="block text-xs text-gray-400 mb-3">
+                法定节假日已自动停诊；如需临时停诊或恢复接诊，切换后点保存即可，全院所有科室当日号源自动归 0
+              </Text>
               <View className="flex flex-row items-center justify-between mb-3 p-3 bg-gray-50 rounded-xl">
-                <Text className="block text-sm text-gray-700">是否设为本日节假日（暂停接诊）</Text>
+                <Text className="block text-sm text-gray-700">{selQuotaDate} 当日状态</Text>
                 <Button
                   size="sm"
                   variant={isHoliday ? 'default' : 'outline'}
                   className={cn(isHoliday ? 'bg-amber-500' : '')}
                   onClick={() => setIsHoliday(!isHoliday)}
                 >
-                  <Text className="text-xs">{isHoliday ? '节假日' : '正常接诊'}</Text>
+                  <Text className="text-xs">{isHoliday ? '节假日停诊' : '正常接诊'}</Text>
                 </Button>
               </View>
-              <Button className="w-full bg-teal-600" onClick={handleSaveQuota}>
-                <Text>保存号源设置</Text>
+              <Button className="w-full bg-amber-500" onClick={handleSaveQuota}>
+                <Text>{isHoliday ? '保存：全院停诊' : '保存：全院恢复接诊'}</Text>
               </Button>
-              {!isTodayQuota && (
+            </View>
+
+            <View className="bg-white rounded-2xl p-4 mt-3 shadow-sm">
+              <Text className="block text-base font-semibold mb-3">号源数量设置（按科室）</Text>
+              <View className={`flex flex-row gap-3 mb-3 ${isHoliday ? 'opacity-40' : ''}`}>
+                <View className="flex-1">
+                  <Text className="block text-sm text-gray-500 mb-1">上午号源（08:00-12:00）</Text>
+                  <Input
+                    type="number"
+                    value={isHoliday ? '0' : morning}
+                    disabled={isHoliday}
+                    onInput={(e: any) => setMorning(e.detail.value)}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="block text-sm text-gray-500 mb-1">下午号源（14:00-17:00）</Text>
+                  <Input
+                    type="number"
+                    value={isHoliday ? '0' : afternoon}
+                    disabled={isHoliday}
+                    onInput={(e: any) => setAfternoon(e.detail.value)}
+                  />
+                </View>
+              </View>
+              <Button
+                className="w-full bg-teal-600"
+                onClick={handleSaveQuota}
+                disabled={isHoliday}
+              >
+                <Text>{isHoliday ? '节假日停诊中' : '保存该科室号源'}</Text>
+              </Button>
+              {!isTodayQuota && !isHoliday && (
                 <Button
                   className="w-full mt-2 bg-sky-500"
                   onClick={() => handleSaveInitial(selDeptId, selQuotaDate)}
                 >
-                  <Text>将该设置应用到全部科室该日期</Text>
+                  <Text>将该号源数量应用到全部科室该日期</Text>
                 </Button>
               )}
             </View>

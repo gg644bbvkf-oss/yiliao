@@ -36,6 +36,7 @@ export interface QuotaData {
   afternoonQuota: number
   afternoonLeft: number
   isHoliday?: boolean
+  holidayName?: string
 }
 
 /* ================= 内置静态快照（与当前线上数据保持一致） ================= */

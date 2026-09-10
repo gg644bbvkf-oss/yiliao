@@ -66,6 +66,7 @@ export class AppointmentController {
           morningLeft: morning.remaining,
           afternoonLeft: afternoon.remaining,
           isHoliday: morningQuota?.isHoliday ?? false,
+          holidayName: (morningQuota as any)?.holidayName || '',
         },
       };
     } catch (e: any) {
