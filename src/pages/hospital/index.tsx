@@ -1,34 +1,20 @@
 import { View, Text, ScrollView, Image } from '@tarojs/components'
-import { useLoad } from '@tarojs/taro'
+import { useDidShow } from '@tarojs/taro'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Network } from '@/network'
+import { fetchDoctors, FALLBACK_DOCTORS, type DoctorItem } from '@/services/content'
 import { useState } from 'react'
 
-interface Doctor {
-  id: string
-  name: string
-  title: string
-  avatar: string
-  specialty: string
-  introduction: string
-  departmentName: string
-}
-
 const HospitalPage = () => {
-  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [doctors, setDoctors] = useState<DoctorItem[]>(FALLBACK_DOCTORS)
 
-  useLoad(() => {
+  useDidShow(() => {
     loadDoctors()
   })
 
   const loadDoctors = async () => {
-    try {
-      const res = await Network.request({ url: '/api/content/doctors' })
-      setDoctors(res.data?.data || [])
-    } catch {
-      setDoctors([])
-    }
+    const list = await fetchDoctors()
+    setDoctors(list)
   }
 
   return (

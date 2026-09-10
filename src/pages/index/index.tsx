@@ -11,60 +11,20 @@ import {
   ArrowRight,
 } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
-import { Network } from '@/network'
+import { fetchHospital, FALLBACK_HOSPITAL } from '@/services/content'
 import { useState } from 'react'
 import './index.css'
 
-interface HospitalData {
-  intro: string
-  service: string
-  image: string
-  stats: Array<{ label: string; value: string }>
-  phone: string
-  address: string
-}
-
 const IndexPage = () => {
-  const [hospital, setHospital] = useState<HospitalData>({
-    intro: '',
-    service: '',
-    image: '',
-    stats: [
-      { label: '建筑面积', value: '2185㎡' },
-      { label: '职工人数', value: '18人' },
-      { label: '中高级职称', value: '14人' },
-      { label: '开设床位', value: '18张' },
-    ],
-    phone: '0910-3456789',
-    address: '旬邑县阳光大道幽风庭韵小区西侧',
-  })
+  const [hospital, setHospital] = useState(FALLBACK_HOSPITAL)
 
   useDidShow(() => {
     loadHospital()
   })
 
   const loadHospital = async () => {
-    try {
-      const res = await Network.request({ url: '/api/content/hospital' })
-      const data = res.data?.data || {}
-      let stats = hospital.stats
-      try {
-        const parsed = JSON.parse(data.stats || '[]')
-        if (Array.isArray(parsed) && parsed.length) stats = parsed
-      } catch {
-        /* ignore */
-      }
-      setHospital({
-        intro: data.intro || hospital.intro,
-        service: data.service || hospital.service,
-        image: data.image || '',
-        stats,
-        phone: data.phone || hospital.phone,
-        address: data.address || hospital.address,
-      })
-    } catch {
-      /* 保持默认 */
-    }
+    const data = await fetchHospital()
+    setHospital(data)
   }
 
   const statsIcons = [Building2, Users, Award, HeartPulse]

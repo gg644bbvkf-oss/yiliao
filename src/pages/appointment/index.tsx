@@ -1,47 +1,39 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import Taro, { useLoad } from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import {
   Stethoscope,
   Flower2,
   Hospital,
+  BedDouble,
+  HeartPulse,
   ChevronRight,
   ListOrdered,
 } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
-import { Network } from '@/network'
+import { fetchDepartments, FALLBACK_DEPARTMENTS, type DepartmentItem } from '@/services/content'
 import { useState } from 'react'
-
-interface Department {
-  id: string
-  name: string
-  description: string
-  icon: string
-  location: string
-}
 
 const iconMap: Record<string, React.ComponentType<any>> = {
   Stethoscope,
   Flower2,
   Hospital,
+  BedDouble,
+  HeartPulse,
 }
 
 const IndexPage = () => {
-  const [departments, setDepartments] = useState<Department[]>([])
+  const [departments, setDepartments] = useState<DepartmentItem[]>(FALLBACK_DEPARTMENTS)
 
-  useLoad(() => {
+  useDidShow(() => {
     loadDepartments()
   })
 
   const loadDepartments = async () => {
-    try {
-      const res = await Network.request({ url: '/api/content/departments' })
-      setDepartments(res.data?.data || [])
-    } catch {
-      setDepartments([])
-    }
+    const list = await fetchDepartments()
+    setDepartments(list)
   }
 
-  const handleSelectDept = (dept: Department) => {
+  const handleSelectDept = (dept: DepartmentItem) => {
     Taro.navigateTo({
       url: `/pages/appointment/booking-form?departmentId=${dept.id}&departmentName=${encodeURIComponent(
         dept.name

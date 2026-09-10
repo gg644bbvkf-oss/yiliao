@@ -141,7 +141,23 @@ export default defineConfig<'vite'>(async (merge, _env) => {
           },
         },
         ...(isH5
-          ? []
+          ? [
+              // H5 部署到 GitHub Pages 子路径(如 /yiliao/)时，Taro 把 tabBar 图标
+              // 硬编码为绝对路径 "/static/images/xxx.png"，浏览器会解析到域名根导致 404。
+              // 这里在构建产物阶段改写为相对路径 "./static/images/"，配合 hash 路由可正确加载。
+              {
+                name: 'fix-h5-tabbar-icon-path',
+                generateBundle(_options: unknown, bundle: Record<string, { type?: string; code?: string }>) {
+                  for (const fileName of Object.keys(bundle)) {
+                    if (!fileName.endsWith('.js')) continue
+                    const chunk = bundle[fileName]
+                    if (chunk?.type === 'chunk' && typeof chunk.code === 'string' && chunk.code.includes('"/static/images/')) {
+                      chunk.code = chunk.code.split('"/static/images/').join('"./static/images/')
+                    }
+                  }
+                },
+              },
+            ]
           : [
               UnifiedViteWeappTailwindcssPlugin({
                 rem2rpx: true,

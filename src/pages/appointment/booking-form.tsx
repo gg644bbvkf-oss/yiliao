@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Network } from '@/network'
+import { fetchQuota, FALLBACK_QUOTA } from '@/services/content'
 import { getPatients } from '@/data/mock-data'
 
 interface SlotData {
@@ -41,7 +42,7 @@ const BookingFormPage = () => {
   const dates = useMemo(genDates, [])
   const [selectedDate, setSelectedDate] = useState(dates[0])
   const [period, setPeriod] = useState<'上午' | '下午'>('上午')
-  const [slot, setSlot] = useState<SlotData | null>(null)
+  const [slot, setSlot] = useState<SlotData>(FALLBACK_QUOTA)
 
   const savedPatients = useMemo(() => getPatients(), [])
 
@@ -52,15 +53,8 @@ const BookingFormPage = () => {
   const [submitting, setSubmitting] = useState(false)
 
   const loadQuota = async (date: string) => {
-    try {
-      const res = await Network.request({
-        url: '/api/appointments/quota',
-        data: { departmentId, departmentName, date },
-      })
-      setSlot(res.data?.data || null)
-    } catch {
-      setSlot(null)
-    }
+    const q = await fetchQuota({ departmentId, departmentName, date })
+    setSlot(q)
   }
 
   useEffect(() => {
@@ -68,9 +62,9 @@ const BookingFormPage = () => {
   }, [selectedDate])
 
   const leftOfPeriod = (p: '上午' | '下午') =>
-    slot ? (p === '上午' ? slot.morningLeft : slot.afternoonLeft) : 0
+    p === '上午' ? slot.morningLeft : slot.afternoonLeft
   const quotaOfPeriod = (p: '上午' | '下午') =>
-    slot ? (p === '上午' ? slot.morningQuota : slot.afternoonQuota) : 0
+    p === '上午' ? slot.morningQuota : slot.afternoonQuota
 
   const handleSelectPatient = (idx: number) => {
     const p = savedPatients[idx]
@@ -130,17 +124,36 @@ const BookingFormPage = () => {
       })
       console.log('预约响应:', res.data)
       const body = res.data as any
-      if (body?.code === 200 && body?.data) {
+      const statusOk =
+        (typeof res.statusCode === 'number' ? res.statusCode : 200) < 400
+      if (statusOk && body?.code === 200 && body?.data) {
         Taro.setStorageSync('hospital_user_phone', patientPhone)
         Taro.redirectTo({
           url: `/pages/appointment/booking-result?id=${body.data.id}`,
         })
       } else {
-        Taro.showToast({ title: body?.msg || '预约失败', icon: 'none' })
+        // 静态网页版（无后端）时提示改用电话预约，避免误导用户以为可在线挂号
+        const offline =
+          !statusOk ||
+          typeof body === 'string' ||
+          (body && typeof body === 'object' && !('code' in body))
+        Taro.showModal({
+          title: offline ? '网页版暂不支持在线预约' : '预约失败',
+          content: offline
+            ? '网页版暂不支持在线提交预约，请拨打咨询电话 0910-1234567890 或到院挂号，也可在微信小程序中预约。'
+            : body?.msg || '请稍后重试',
+          showCancel: false,
+          confirmText: '我知道了',
+        })
       }
     } catch (err) {
       console.error('预约失败:', err)
-      Taro.showToast({ title: '网络错误，请重试', icon: 'none' })
+      Taro.showModal({
+        title: '网页版暂不支持在线预约',
+        content: '网络不可用，请拨打咨询电话 0910-1234567890 或到院挂号，也可在微信小程序中预约。',
+        showCancel: false,
+        confirmText: '我知道了',
+      })
     } finally {
       setSubmitting(false)
     }
