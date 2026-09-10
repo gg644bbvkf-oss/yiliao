@@ -5,7 +5,6 @@ import {
   User,
   UserRound,
   CalendarClock,
-  Heart,
   Users,
   ChevronRight,
   ShieldCheck,
@@ -15,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Network } from '@/network'
-import { getAppointments, getPatients, getFavorites, healthArticles, getDateDisplay } from '@/data/mock-data'
+import { getAppointments, getPatients, getDateDisplay } from '@/data/mock-data'
 
 const ADMIN_PHONE_KEY = 'hospital_admin_phone'
 const USER_PHONE_KEY = 'hospital_user_phone'
@@ -24,14 +23,11 @@ const menuItems = [
   { name: '就诊人管理', icon: Users, page: '/pages/profile/patient-manage', desc: '管理就诊人信息' },
   { name: '我的预约', icon: CalendarClock, page: '/pages/appointment/my-appointments', desc: '查看预约记录' },
   { name: '管理后台', icon: ShieldCheck, page: '/pages/profile/admin-mgmt', desc: '预约管理 / 号源设置 / 黑名单', admin: true },
-  { name: '我的收藏', icon: Heart, page: '', desc: '收藏的健康文章' },
 ]
 
 const ProfilePage = () => {
   const [patientCount, setPatientCount] = useState(0)
   const [appointmentCount, setAppointmentCount] = useState(0)
-  const [favoriteCount, setFavoriteCount] = useState(0)
-  const [showFavorites, setShowFavorites] = useState(false)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [adminPhone, setAdminPhone] = useState('')
   const [adminChecking, setAdminChecking] = useState(false)
@@ -43,7 +39,6 @@ const ProfilePage = () => {
   const refreshCounts = useCallback(() => {
     setPatientCount(getPatients().length)
     setAppointmentCount(getAppointments().filter((a) => a.status === 'pending').length)
-    setFavoriteCount(getFavorites().length)
     setUserPhone(Taro.getStorageSync(USER_PHONE_KEY) || '')
   }, [])
 
@@ -56,9 +51,7 @@ const ProfilePage = () => {
   })
 
   const handleMenuClick = (item: typeof menuItems[0]) => {
-    if (item.name === '我的收藏') {
-      setShowFavorites(!showFavorites)
-    } else if (item.name === '我的预约') {
+    if (item.name === '我的预约') {
       // 我的预约需登录后查看（仅显示当前登录手机号的预约）
       const saved = Taro.getStorageSync(USER_PHONE_KEY)
       if (saved) {
@@ -154,11 +147,7 @@ const ProfilePage = () => {
     Taro.showToast({ title: '已退出登录', icon: 'none' })
   }
 
-  const counts = [patientCount, appointmentCount, favoriteCount]
-
-  const favoriteArticles = healthArticles.filter((a) =>
-    getFavorites().includes(a.id)
-  )
+  const counts = [patientCount, appointmentCount]
 
   return (
     <ScrollView scrollY className="h-full bg-teal-50">
@@ -243,43 +232,6 @@ const ProfilePage = () => {
           </CardContent>
         </Card>
       </View>
-
-      {/* 收藏列表 */}
-      {showFavorites && (
-        <View className="px-4 mb-6">
-          <Text className="text-lg font-bold text-slate-800 block mb-3">收藏的文章</Text>
-          {favoriteArticles.length === 0 ? (
-            <Card className="bg-white rounded-xl shadow-sm">
-              <CardContent className="p-6 flex items-center justify-center">
-                <Text className="text-sm text-slate-400 block text-center">
-                  暂无收藏文章
-                </Text>
-              </CardContent>
-            </Card>
-          ) : (
-            <View className="flex flex-col gap-3">
-              {favoriteArticles.map((article) => (
-                <Card key={article.id} className="bg-white rounded-xl shadow-sm">
-                  <CardContent className="p-4">
-                    <Text className="text-base font-semibold text-slate-800 block">
-                      {article.title}
-                    </Text>
-                    <View className="flex flex-row items-center gap-2 mt-2">
-                      <Badge
-                        variant="secondary"
-                        className="bg-teal-50 text-teal-700 border-0 text-xs"
-                      >
-                        {article.category}
-                      </Badge>
-                      <Text className="text-xs text-slate-400 block">{article.date}</Text>
-                    </View>
-                  </CardContent>
-                </Card>
-              ))}
-            </View>
-          )}
-        </View>
-      )}
 
       {/* 最近预约 */}
       {getAppointments().filter((a) => a.status === 'pending').length > 0 && (
