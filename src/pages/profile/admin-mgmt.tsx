@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { LockKeyhole } from 'lucide-react-taro'
+import { LockKeyhole, Download } from 'lucide-react-taro'
 import type { Department } from '@/data/mock-data'
 import { cn } from '@/lib/utils'
 import ContentMgmt from '@/components/content-mgmt'
@@ -48,15 +48,15 @@ interface BlackItem {
 
 function genDates(): { date: string; label: string }[] {
   const arr: { date: string; label: string }[] = []
-  const labels = ['今天', '明天', '后天']
+  // 首个为"全部未过期预约"档位
+  arr.push({ date: 'ALL', label: '全部' })
   for (let i = 0; i < 7; i++) {
     const d = new Date()
     d.setDate(d.getDate() + i)
     const mm = String(d.getMonth() + 1).padStart(2, '0')
     const dd = String(d.getDate()).padStart(2, '0')
     const date = `${d.getFullYear()}-${mm}-${dd}`
-    const label = i < 3 ? labels[i] : `${mm}月${dd}日`
-    arr.push({ date, label })
+    arr.push({ date, label: `${mm}月${dd}日` })
   }
   return arr
 }
@@ -73,12 +73,12 @@ export default function AdminMgmt() {
   const dates = genDates()
   const [activeTab, setActiveTab] = useState('appointments')
   const [appts, setAppts] = useState<ApptItem[]>([])
-  const [selDate, setSelDate] = useState(dates[0].date)
+  const [selDate, setSelDate] = useState('ALL')
 
   // 号源设置
   const [deptList, setDeptList] = useState<Department[]>([])
   const [selDeptId, setSelDeptId] = useState('')
-  const [selQuotaDate, setSelQuotaDate] = useState(dates[0].date)
+  const [selQuotaDate, setSelQuotaDate] = useState(dates[1]?.date || dates[0].date)
   const [morning, setMorning] = useState('10')
   const [afternoon, setAfternoon] = useState('5')
   const [isHoliday, setIsHoliday] = useState(false)
@@ -287,7 +287,41 @@ export default function AdminMgmt() {
     await loadBlack()
   }
 
-  const filtered = appts.filter((a) => a.date === selDate && a.status !== 'cancelled')
+  const handleExportAppts = async () => {
+    if (appts.length === 0) {
+      Taro.showToast({ title: '暂无预约可导出', icon: 'none' })
+      return
+    }
+    const now = new Date()
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const list = appts
+      .filter((a) => (selDate === 'ALL' ? a.date >= todayStr : a.date === selDate) && a.status !== 'cancelled')
+    const head = '序号,患者姓名,手机号,身份证号,科室,医生,职称,预约日期,时段,状态'
+    const rows = list.map((a, i) =>
+      [i + 1, a.patientName, a.patientPhone, a.patientIdCard, a.departmentName || '', a.doctorName || '', a.doctorTitle || '', a.date, a.timeSlot, a.status === 'confirmed' ? '已预约' : '已取消'].join(','),
+    )
+    const csv = '\uFEFF' + [head, ...rows].join('\n')
+    const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP
+    const isTt = Taro.getEnv() === Taro.ENV_TYPE.TT
+    if (!isWeapp && !isTt) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `预约信息_${selDate === 'ALL' ? '全部' : selDate}.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+      Taro.showToast({ title: '已导出预约信息', icon: 'success' })
+    } else {
+      await Taro.setClipboardData({ data: csv })
+    }
+  }
+
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  const filtered = selDate === 'ALL'
+    ? appts.filter((a) => a.date >= todayStr && a.status !== 'cancelled')
+    : appts.filter((a) => a.date === selDate && a.status !== 'cancelled')
 
   if (!loggedIn) {
     return (
@@ -374,22 +408,28 @@ export default function AdminMgmt() {
 
           {/* 预约管理 */}
           <TabsContent value="appointments" className="mt-3">
-            <View className="flex flex-wrap gap-2 mb-3">
-              {dates.map((d) => (
-                <Button
-                  key={d.date}
-                  size="sm"
-                  variant={selDate === d.date ? 'default' : 'outline'}
-                  className={cn(selDate === d.date ? 'bg-teal-600' : '')}
-                  onClick={() => setSelDate(d.date)}
-                >
-                  <Text className="text-xs">{d.label}</Text>
-                </Button>
-              ))}
+            <View className="flex flex-row items-start gap-2 mb-3">
+              <View className="flex flex-wrap gap-2 flex-1">
+                {dates.map((d) => (
+                  <Button
+                    key={d.date}
+                    size="sm"
+                    variant={selDate === d.date ? 'default' : 'outline'}
+                    className={cn(selDate === d.date ? 'bg-teal-600' : '')}
+                    onClick={() => setSelDate(d.date)}
+                  >
+                    <Text className="text-xs">{d.label}</Text>
+                  </Button>
+                ))}
+              </View>
+              <Button size="sm" variant="outline" className="shrink-0 flex-row" onClick={handleExportAppts}>
+                <Download size={16} color="#1890ff" />
+                <Text className="text-xs ml-1 text-blue-500">导出</Text>
+              </Button>
             </View>
             {filtered.length === 0 ? (
               <View className="bg-white rounded-2xl p-8 text-center">
-                <Text className="block text-gray-400">该日期暂无预约</Text>
+                <Text className="block text-gray-400">{selDate === 'ALL' ? '暂无未过期预约' : '该日期暂无预约'}</Text>
               </View>
             ) : (
               filtered.map((a) => (
@@ -442,7 +482,7 @@ export default function AdminMgmt() {
             <View className="bg-white rounded-2xl p-4 mt-3 shadow-sm">
               <Text className="block text-base font-semibold mb-2">选择日期</Text>
               <View className="flex flex-wrap gap-2">
-                {dates.map((d) => (
+                {dates.filter((d) => d.date !== 'ALL').map((d) => (
                   <Button
                     key={d.date}
                     size="sm"
