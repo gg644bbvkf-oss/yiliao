@@ -31,13 +31,13 @@ const IndexPage = () => {
     loadRolling()
   })
 
-  // 公告纵向自动滚动：每隔一秒滚动到下一行（无内容则不滚动）
+  // 公告纵向自动滚动：每个段落/每条内容展示 3 秒后向上滚动到下一条（无内容则不滚动）
   useEffect(() => {
     if (rolling.length === 0) return
     setActiveRollIdx(0)
     const timer = setInterval(() => {
       setActiveRollIdx((prev) => (prev + 1) % rolling.length)
-    }, 1000)
+    }, 3000)
     return () => clearInterval(timer)
   }, [rolling.length])
 
@@ -148,14 +148,14 @@ const IndexPage = () => {
             <ScrollView
               scrollY
               scrollIntoView={`roll-${activeRollIdx}`}
-              className="w-full h-20"
+              className="w-full h-28"
             >
               <View className="flex flex-col">
                 {rolling.map((item, i) => (
                   <View
                     key={item.id}
                     id={`roll-${i}`}
-                    className="flex flex-row items-center whitespace-pre-line h-20"
+                    className="flex flex-row items-center whitespace-pre-line h-28"
                   >
                     <View className="w-2 h-2 rounded-full bg-teal-500 mr-2 shrink-0" />
                     <View className="flex-1">
