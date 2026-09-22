@@ -31,9 +31,9 @@ export default function SupportFooter({ withTabBar = false }: { withTabBar?: boo
             style={{ textDecorationLine: 'underline' }}
             onClick={handleCall}
           >
-            旬邑移动
+            旬邑移动公司
           </Text>
-          公司制作并提供技术支持
+          制作并提供技术支持
         </Text>
       </View>
     </View>
