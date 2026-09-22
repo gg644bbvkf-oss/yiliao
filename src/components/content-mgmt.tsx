@@ -101,6 +101,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
   const [depName, setDepName] = useState('')
   const [depDesc, setDepDesc] = useState('')
   const [depLoc, setDepLoc] = useState('')
+  const [editingDeptId, setEditingDeptId] = useState<string | null>(null)
 
   // 医生
   const [doctors, setDoctors] = useState<DoctorItem[]>([])
@@ -211,17 +212,34 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
     setDepLoc('')
   }
 
-  async function updateDept(id: string, patch: Partial<DepItem>) {
+  function editDept(d: DepItem) {
+    setEditingDeptId(d.id)
+    setDepName(d.name || '')
+    setDepDesc(d.description || '')
+    setDepLoc(d.location || '')
+  }
+
+  function cancelEditDept() {
+    setEditingDeptId(null)
+    setDepName('')
+    setDepDesc('')
+    setDepLoc('')
+  }
+
+  async function saveEditDept() {
+    if (!editingDeptId) return
+    if (!depName.trim()) return
     await runWrite(async () => {
       await unwrap(
         Network.request({
-          url: `/api/content/admin/department/${id}`,
+          url: `/api/content/admin/department/${editingDeptId}`,
           method: 'PUT',
           header: adminHeaders(),
-          data: patch,
+          data: { name: depName, description: depDesc, location: depLoc },
         }),
       )
     }, '科室已更新')
+    cancelEditDept()
   }
 
   async function delDept(id: string) {
@@ -472,11 +490,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
               <View className="mb-1 flex items-center justify-between">
                 <Text className="block text-base font-semibold text-gray-800">{d.name}</Text>
                 <View className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => updateDept(d.id, { description: '（已更新）' })}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => editDept(d)}>
                     <Text>编辑</Text>
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => delDept(d.id)}>
@@ -485,6 +499,30 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
                 </View>
               </View>
               <Text className="block text-sm text-gray-500">{d.description}</Text>
+              {editingDeptId === d.id && (
+                <View className="mt-3 rounded-lg border border-teal-100 bg-teal-50 p-3">
+                  <Text className={labelCls}>科室名称</Text>
+                  <View className={inputWrap}>
+                    <Input style={{ width: '100%' }} value={depName} onInput={(e) => setDepName(e.detail.value)} placeholder="科室名称" />
+                  </View>
+                  <Text className={labelCls}>科室简介</Text>
+                  <View className={inputWrap}>
+                    <Textarea style={{ width: '100%', minHeight: 60 }} value={depDesc} onInput={(e) => setDepDesc(e.detail.value)} placeholder="科室简介" />
+                  </View>
+                  <Text className={labelCls}>位置</Text>
+                  <View className={inputWrap}>
+                    <Input style={{ width: '100%' }} value={depLoc} onInput={(e) => setDepLoc(e.detail.value)} placeholder="位置" />
+                  </View>
+                  <View className="flex gap-2">
+                    <Button size="sm" className="flex-1" onClick={saveEditDept}>
+                      <Text>保存修改</Text>
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={cancelEditDept}>
+                      <Text>取消</Text>
+                    </Button>
+                  </View>
+                </View>
+              )}
             </View>
           ))}
         </View>
