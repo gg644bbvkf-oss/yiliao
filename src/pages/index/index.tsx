@@ -139,7 +139,7 @@ const IndexPage = () => {
                 className="flex flex-col"
                 style={{
                   animation: 'roll-vertical linear infinite',
-                  animationDuration: rolling.length > 0 ? `${rolling.length * 3}s` : '0s',
+                  animationDuration: rolling.length > 0 ? `${rolling.length * 6}s` : '0s',
                 }}
               >
                 {/* 内容重复两份：平移 -50% 形成无缝循环 */}
@@ -148,12 +148,18 @@ const IndexPage = () => {
                   .map((item, idx) => (
                     <View
                       key={`${item.id}-${idx}`}
-                      className="flex flex-row items-center whitespace-pre-line"
+                      className="flex flex-row items-start overflow-hidden"
                       style={{ height: '108px' }}
                     >
-                      <View className="w-2 h-2 rounded-full bg-teal-500 mr-3 shrink-0" />
-                      <View className="flex-1">
-                        <Text className="block text-sm text-slate-600 leading-relaxed">
+                      <View className="w-2 h-2 rounded-full bg-teal-500 mr-3 shrink-0 mt-2" />
+                      <View className="flex-1 overflow-hidden">
+                        <Text
+                          className="block leading-relaxed"
+                          style={{
+                            fontSize: item.fontSize ? `${item.fontSize}px` : '14px',
+                            color: item.color || '#374151',
+                          }}
+                        >
                           {item.content}
                         </Text>
                       </View>

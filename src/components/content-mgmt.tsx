@@ -39,6 +39,8 @@ interface RollItem {
   id: string
   content: string
   sortOrder?: number
+  fontSize?: string
+  color?: string
 }
 
 async function unwrap(p: Promise<any>): Promise<any> {
@@ -121,6 +123,8 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
   // 滚动内容
   const [rolls, setRolls] = useState<RollItem[]>([])
   const [rollContent, setRollContent] = useState('')
+  const [rollFontSize, setRollFontSize] = useState('14')
+  const [rollColor, setRollColor] = useState('#374151')
   const [editingRollId, setEditingRollId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -408,13 +412,15 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
   function addRoll() {
     const c = rollContent.trim()
     if (!c) return
-    setRolls((prev) => [...prev, { id: '__new__', content: c }])
+    setRolls((prev) => [...prev, { id: '__new__', content: c, fontSize: rollFontSize, color: rollColor }])
     setRollContent('')
   }
 
   function beginEditRoll(r: RollItem) {
     setEditingRollId(r.id)
     setRollContent(r.content)
+    setRollFontSize(r.fontSize || '14')
+    setRollColor(r.color || '#374151')
   }
 
   function cancelEditRoll() {
@@ -432,7 +438,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
               url: '/api/content/admin/rolling-news',
               method: 'POST',
               header: adminHeaders(),
-              data: { content: r.content },
+              data: { content: r.content, fontSize: r.fontSize || '14', color: r.color || '#374151' },
             }),
           )
         } else if (!r.content.trim()) {
@@ -450,7 +456,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
               url: `/api/content/admin/rolling-news/${r.id}`,
               method: 'PUT',
               header: adminHeaders(),
-              data: { content: r.content },
+              data: { content: r.content, fontSize: r.fontSize || '14', color: r.color || '#374151' },
             }),
           )
         }
@@ -479,7 +485,13 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
   }
 
   function saveEditedRoll(id: string) {
-    setRolls((prev) => prev.map((x) => (x.id === id ? { ...x, content: rollContent.trim() } : x)))
+    setRolls((prev) =>
+      prev.map((x) =>
+        x.id === id
+          ? { ...x, content: rollContent.trim(), fontSize: rollFontSize, color: rollColor }
+          : x,
+      ),
+    )
     setEditingRollId(null)
     setRollContent('')
   }
@@ -605,7 +617,33 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
                   <View className={inputWrap}>
                     <Input style={{ width: '100%' }} value={depLoc} onInput={(e) => setDepLoc(e.detail.value)} placeholder="位置" />
                   </View>
-                  <View className="flex gap-2">
+                  <Text className="text-slate-600 text-sm block mb-1">字号</Text>
+              <View className="flex flex-row flex-wrap gap-2 mb-2">
+                {['12', '13', '14', '15', '16', '18', '20'].map((s) => (
+                  <Button
+                    key={s}
+                    size="sm"
+                    variant={rollFontSize === s ? 'default' : 'outline'}
+                    className="px-3"
+                    onClick={() => setRollFontSize(s)}
+                  >
+                    <Text style={{ fontSize: Number(s) }}>{s}</Text>
+                  </Button>
+                ))}
+              </View>
+              <Text className="text-slate-600 text-sm block mb-1">颜色</Text>
+              <View className="flex flex-row flex-wrap items-center gap-2 mb-2">
+                {['#374151', '#0D9488', '#2563EB', '#DC2626', '#16A34A', '#B45309', '#7C3AED'].map((c) => (
+                  <View
+                    key={c}
+                    className="w-6 h-6 rounded-full border border-gray-300"
+                    style={{ backgroundColor: c }}
+                    onClick={() => setRollColor(c)}
+                  />
+                ))}
+                <Text className="text-xs text-gray-500 block">当前颜色：{rollColor} ({rollFontSize}px)</Text>
+              </View>
+              <View className="flex gap-2">
                     <Button size="sm" className="flex-1" onClick={saveEditDept}>
                       <Text>保存修改</Text>
                     </Button>
@@ -738,6 +776,31 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
                             placeholder="编辑内容"
                           />
                         </View>
+                        <View className="flex flex-row flex-wrap gap-2 my-2">
+                          <Text className="block text-sm text-slate-600 mr-1">字号</Text>
+                          {['12', '14', '16', '18', '20'].map((s) => (
+                            <Button
+                              key={`e-${s}`}
+                              size="sm"
+                              variant={rollFontSize === s ? 'default' : 'outline'}
+                              className="px-2"
+                              onClick={() => setRollFontSize(s)}
+                            >
+                              <Text style={{ fontSize: Number(s) }}>{s}</Text>
+                            </Button>
+                          ))}
+                        </View>
+                        <View className="flex flex-row items-center gap-2 mb-2">
+                          <Text className="block text-sm text-slate-600 mr-1">颜色</Text>
+                          {['#374151', '#0D9488', '#2563EB', '#DC2626', '#16A34A', '#B45309', '#7C3AED'].map((c) => (
+                            <View
+                              key={`ec-${c}`}
+                              className="w-6 h-6 rounded-full border border-gray-300"
+                              style={{ backgroundColor: c }}
+                              onClick={() => setRollColor(c)}
+                            />
+                          ))}
+                        </View>
                         <View className="flex items-center gap-2">
                           <Button size="sm" onClick={() => saveEditedRoll(r.id)}>
                             <Text>保存</Text>
@@ -749,7 +812,15 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
                       </View>
                     ) : (
                       <View className="flex flex-row items-start gap-2">
-                        <Text className="flex-1 text-sm text-gray-700 leading-relaxed block whitespace-pre-line">{r.content}</Text>
+                        <Text
+                          className="flex-1 leading-relaxed block whitespace-pre-line"
+                          style={{
+                            fontSize: r.fontSize ? `${r.fontSize}px` : '14px',
+                            color: r.color || '#374151',
+                          }}
+                        >
+                          {r.content}
+                        </Text>
                         <View className="flex flex-col gap-2">
                           <Button size="sm" variant="outline" onClick={() => beginEditRoll(r)}>
                             <Text>编辑</Text>

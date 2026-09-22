@@ -175,7 +175,7 @@ export class ContentService {
   async getRollingNews() {
     const { data, error } = await this.client
       .from('rolling_news')
-      .select('id, content, sort_order')
+      .select('id, content, sort_order, font_size, color')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
     if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
@@ -183,6 +183,8 @@ export class ContentService {
       id: r.id,
       content: r.content || '',
       sortOrder: Number(r.sort_order) || 0,
+      fontSize: r.font_size || '14',
+      color: r.color || '#374151',
     }));
   }
 
@@ -195,6 +197,8 @@ export class ContentService {
       .insert({
         content: String(body.content).trim(),
         sort_order: Number(body.sortOrder) || 99,
+        font_size: String(body.fontSize || '14'),
+        color: String(body.color || '#374151'),
       })
       .select()
       .single();
@@ -209,6 +213,8 @@ export class ContentService {
       patch.content = String(body.content).trim();
     }
     if (body.sortOrder !== undefined) patch.sort_order = Number(body.sortOrder);
+    if (body.fontSize !== undefined) patch.font_size = String(body.fontSize);
+    if (body.color !== undefined) patch.color = String(body.color);
     const { data, error } = await this.client.from('rolling_news').update(patch).eq('id', id).select().single();
     if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
     return data;

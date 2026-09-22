@@ -46,6 +46,8 @@ export interface RollingNewsItem {
   id: string
   content: string
   sortOrder?: number
+  fontSize?: string
+  color?: string
 }
 
 /* ================= 内置静态快照（与当前线上数据保持一致） ================= */
@@ -149,9 +151,9 @@ export const FALLBACK_QUOTA: QuotaData = {
 
 // 滚动内容兜底（滚动新闻 / 健康知识）
 export const FALLBACK_ROLLING: RollingNewsItem[] = [
-  { id: 'roll-1', content: '【温馨提示】我院网上预约挂号均不收取任何费用，请勿轻信"卖号代排"行为，如遇请拨 029-37111120 举报。' },
-  { id: 'roll-2', content: '【门诊安排】中医门诊坐诊时间：周一至周五 8:30-12:00（节假日除外），请合理安排就诊时间。' },
-  { id: 'roll-3', content: '【健康知识】冬季流感高发，注意勤洗手、多通风、接种疫苗，出现发热请及时就医。' },
+  { id: 'roll-1', content: '【温馨提示】我院网上预约挂号均不收取任何费用，请勿轻信"卖号代排"行为，如遇请拨 029-37111120 举报。', fontSize: '14', color: '#374151' },
+  { id: 'roll-2', content: '【门诊安排】中医门诊坐诊时间：周一至周五 8:30-12:00（节假日除外），请合理安排就诊时间。', fontSize: '14', color: '#374151' },
+  { id: 'roll-3', content: '【健康知识】冬季流感高发，注意勤洗手、多通风、接种疫苗，出现发热请及时就医。', fontSize: '14', color: '#374151' },
 ]
 
 /** 判断响应是否为有效后端数据（静态托管下 /api 会回退返回 index.html 或 404） */
@@ -262,6 +264,8 @@ export const fetchRollingNews = async (): Promise<RollingNewsItem[]> => {
         id: d.id,
         content: d.content || '',
         sortOrder: Number(d.sortOrder) || 0,
+        fontSize: String(d.fontSize || '14'),
+        color: String(d.color || '#374151'),
       }))
   } catch {
     return FALLBACK_ROLLING
