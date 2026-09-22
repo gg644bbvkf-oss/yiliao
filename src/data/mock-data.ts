@@ -70,25 +70,21 @@ export interface Patient {
   isDefault: boolean
 }
 
-// 科室数据
+// 科室数据（与线上数据库保持一致）
 export const departments: Department[] = [
-  { id: 'd1', name: '内科', description: '常见病首诊、慢性病管理、心脑血管、呼吸消化系统疾病诊治', icon: 'HeartPulse', location: '门诊楼一层' },
-  { id: 'd2', name: '中医门诊', description: '中医内科诊治、针灸推拿、拔罐刮痧、中药调理', icon: 'Leaf', location: '门诊楼三层' },
-  { id: 'd3', name: '儿科', description: '儿科常见病诊治、儿童生长发育评估与健康指导', icon: 'Syringe', location: '门诊楼一层' },
-  { id: 'd4', name: '中医馆', description: '中医特色诊疗，开展针灸、推拿、拔罐、刮痧、按摩牵引、熏蒸、中医正骨手法复位、小针刀等10类25项中医药适宜技术', icon: 'Flower2', location: '门诊楼三层' },
-  { id: 'd5', name: '康复训练中心', description: '康复理疗、平衡训练、牵引治疗、中医超声治疗、红外线治疗等康复治疗', icon: 'Dumbbell', location: '门诊楼三层' },
-  { id: 'd6', name: '公共卫生科', description: '居民健康档案管理、健康教育、传染病防控、慢性病管理', icon: 'ShieldCheck', location: '门诊楼三层' },
-  { id: 'd7', name: '药剂科', description: '中西药品调配、用药指导、药品管理', icon: 'Pill', location: '门诊楼一层' },
-  { id: 'd8', name: '功能科', description: 'B超检查、心电图检查、生化检验、血细胞分析等检查检验服务', icon: 'Activity', location: '门诊楼二层' },
+  { id: 'dept-quanke', name: '全科', description: '全科常见病、多发病首诊与基本医疗服务', icon: 'Stethoscope', location: '一楼全科门诊' },
+  { id: 'dept-zhongyi', name: '中医', description: '运用针灸、推拿、拔罐、正骨等中医药适宜技术，治疗颈肩腰腿痛及慢性病调理。', icon: 'Flower2', location: '三楼中医馆' },
+  { id: 'dept-zhuyuan', name: '住院', description: '承担住院患者的综合诊疗与康复观察，提供常规疾病住院治疗、术后康复、慢病住院管理等服务。', icon: 'BedDouble', location: '住院楼' },
+  { id: 'dept-neike', name: '内科', description: '内科为医院重点科室，开展心血管、呼吸、消化、神经等系统常见病的诊治，配备经验丰富的内科医师团队，为居民提供规范、专业的诊疗服务。', icon: 'HeartPulse', location: '门诊二楼' },
 ]
 
-// 医生数据
+// 医生数据（与线上数据库保持一致）
 export const doctors: Doctor[] = [
-  { id: 'doc1', departmentId: 'd1', departmentName: '内科', name: '谭斌', title: '院长、主治医师', specialty: '针灸、中西医治疗内外妇儿常见病、脾胃病、中风后遗症、面瘫、心脑血管病、颈腰椎病、骨关节疼痛、带状疱疹、疑难杂症等', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-tanbin_89ba3bb0.png?sign=1790851266-fb0baf8454-0-990c904830ec51866b869366b34731132ec986ce4765f2ef1e35d18eac235fab', introduction: '咸阳市优秀医师，咸阳市中医药学会脾胃病专业委员会委员、本科学历，先后毕业于陕西省中医学校中医医士、延安大学临床医学专业、陕西中医药大学临床医学专业，从事临床诊疗20余年，擅长运用针灸、中西医治疗内外妇儿常见病、脾胃病、中风后遗症、面瘫、心脑血管病、颈腰椎病、骨关节疼痛、带状疱疹、疑难杂症等病症。曾多次被县委县政府评为优秀医生及优秀专业技术人才，被旬邑县卫健局评为健康卫士、十佳医师、旬邑好医生，在县域内群众中享有较高的声誉，多次收到群众送来感谢锦旗。' },
-  { id: 'doc2', departmentId: 'd1', departmentName: '内科', name: '燕萌', title: '内科主治医师', specialty: '心血管疾病、呼吸系统疾病、消化系统疾病、内分泌系统疾病', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-yanmeng_3b061f05.png?sign=1790851267-ad33c79e1c-0-4e23f550e664f9eac14d1dc23c4cd7cc209ecd5e0c02becc2fd5fd1080b6cccf', introduction: '燕萌，女，36岁，本科学历，毕业于延安大学，临床医学专业，内科主治医师，曾先后在旬邑县医院及郑家镇卫生院工作，熟练掌握内科常见疾病的诊断和治疗方法，如心血管疾病、呼吸系统疾病、消化系统疾病、内分泌系统疾病等。具备良好的医患沟通能力，能够耐心倾听患者的诉求，为患者提供专业、易懂的医疗建议。' },
-  { id: 'doc3', departmentId: 'd1', departmentName: '内科', name: '郑瑶瑶', title: '主治医师', specialty: '消化系统及呼吸系统各类疾病诊治', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-zhengyaoyao_f528ac1b.png?sign=1790851267-6bdd4f934d-0-1e758e95c6b9e8ea132fa82f3c66d0a1644298a3f01fb0983be71579058bf475', introduction: '郑瑶瑶，女，34岁，西安交通大学临床医学专业，主治医师，从事临床工作12年，先后工作于福建省将乐县疾控中心、张洪中心卫生院、旬邑县医院，赴泰兴市人民医院进修学习，参加各类学习培训，多次评为旬邑县先进工作者，对待工作认真细致，对待患者细心负责，对内科各类常见疾病有丰富的工作经验，尤其擅长消化系统及呼吸系统各类疾病诊治。' },
-  { id: 'doc4', departmentId: 'd1', departmentName: '内科', name: '杨妮', title: '内科主治医师', specialty: '糖尿病、高血压、艾滋病、丙肝等慢性病和传染病的预防控制', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-yangni_47eec181.png?sign=1790851267-34b3b04a78-0-b3af0608547e3324553511e041d2f46318ee14008198ee500995b72f6787b311', introduction: '杨妮，女，37岁，内科主治医师，本科学历，学士学位，临床医学专业，毕业于西安医学院。2012年参加工作，曾先后担任县疾病预防控制中心慢病科副科长、流病科科长，主要从事糖尿病、高血压、艾滋病、丙肝等慢性病和传染病的预防控制工作。2016年参加省疾控中心组织的现场流行病学培训班学习一年。2020年、2022年分别参与西咸国际机场、西安市新冠疫情流调工作。期间工作认真、爱岗敬业、严谨细致、能力突出，连续多次被评为先进个人。' },
-  { id: 'doc5', departmentId: 'd3', departmentName: '儿科', name: '文丽娟', title: '儿科主治医师', specialty: '儿童生长发育、儿科常见病诊治', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-wenlijuan_3d1f8ef2.png?sign=1790851268-aa9527d5be-0-06ede525dbb30d45672fb1ffac26d0b4731f9d54e20771e6e51975b2ee97ca19', introduction: '文丽娟，本科学历，儿科主治医师。2015年毕业于陕西中医药大学临床医学专业，于2015年至2025年在旬邑县妇计中心内儿科工作，曾于宝鸡市妇幼保健院进修学习儿童生长发育相关知识，并于2022年取得儿科主治医师职称。' },
+  { id: 'doc-tanbin', departmentId: 'dept-zhongyi', departmentName: '中医', name: '谭斌', title: '院长 · 主治医师', specialty: '针灸、中西医结合治疗', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-1788928807207_4af36697.png?sign=1791520807-24027c5852-0-ca563f9849b2f962db601f724f21542507f783e30ccaf2b7145d3825034f0557', introduction: '谭斌，主治医师，本科学历，先后毕业于陕西省中医学校中医医士专业、延安大学临床医学专业及陕西中医药大学临床医学专业，具备中西医双重学术背景。现任咸阳市中医药学会脾胃病专业委员会委员，曾获评"咸阳市优秀医师"，2026年荣获"旬邑县第五届劳动模范先进工作者"称号。\n从事临床诊疗工作二十余年，经验丰富，医术精湛。擅长运用传统针灸疗法，融合中西医诊疗思路，辨证施治内科、外科、妇科、儿科常见病及多发病。尤其在脾胃疾病、中风后遗症、面瘫、心脑血管疾病、颈腰椎骨关节病及各类疑难杂症的诊治方面造诣深厚，疗效显著。\n多次被评为旬邑县"优秀专业技术人才""健康卫士""十佳医师""百姓好医生"等，深受患者信赖与好评，屡获锦旗致谢，在当地群众中享有极高声誉。' },
+  { id: 'doc-yanmeng', departmentId: 'dept-neike', departmentName: '内科', name: '燕萌', title: '内科主治医师', specialty: '心血管、呼吸、消化系统疾病', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-1788928927447_cc61a81c.png?sign=1791520927-43853d2596-0-914f1b90a0a22dd594db0d1878ddf2b1fb571884b67aaa1365f32c525b8433db', introduction: '女，36岁，本科学历，毕业于延安大学临床医学专业。曾先后在旬邑县医院及郑家镇卫生院工作，熟练掌握内科常见疾病的诊治方法，如心血管疾病、呼吸系统疾病、消化系统疾病、内分泌系统疾病等。具备良好的医患沟通能力，能够耐心倾听患者诉求，为患者提供专业、易懂的医疗建议。' },
+  { id: 'doc-zhengyaoyao', departmentId: 'dept-neike', departmentName: '内科', name: '郑瑶瑶', title: '主治医师', specialty: '消化系统及呼吸系统各类疾病诊治', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-1788928950181_4cd24d08.png?sign=1791520950-c7ab7751f8-0-986c2b670ac8c5957c7467df659bca1e92ca68909019aece2c588447390e5cdc', introduction: '女，34岁，西安交通大学临床医学专业，从事临床工作12年。先后工作于福建省将乐县疾控中心、张洪中心卫生院、旬邑县医院，赴泰兴市人民医院进修学习，参加各类学习培训，多次评为旬邑县先进工作者。对待工作认真细致，对待患者细心负责，对内科各类常见疾病有丰富的工作经验，尤其擅长消化系统及呼吸系统各类疾病诊治。' },
+  { id: 'doc-yangni', departmentId: 'dept-neike', departmentName: '内科', name: '杨妮', title: '内科主治医师', specialty: '糖尿病、高血压等慢性病和传染病预防控制', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-1788928975140_57ff3d2f.png?sign=1791520975-9ab059129c-0-d50dd713365080698a5c8abfa34d5f8795ed763d149d80c9d1cc18901cb99146', introduction: '女，37岁，本科学历、学士学位，临床医学专业，毕业于西安医学院。2012年参加工作，曾先后担任县疾病预防控制中心慢病科副科长、流病科科长，主要从事糖尿病、高血压、艾滋病、丙肝等慢性病和传染病的预防控制工作。2016年参加省疾控中心组织的现场流行病学培训班学习一年。2020年、2022年分别参与西咸国际机场、西安市新冠疫情流调工作。工作认真、爱岗敬业、严谨细致、能力突出，连续多次被评为先进个人。' },
+  { id: 'doc-wenlijuan', departmentId: 'dept-quanke', departmentName: '全科', name: '文丽娟', title: '儿科主治医师', specialty: '儿童生长发育、儿科常见病诊治', avatar: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-1788928990209_ea75c94a.png?sign=1791520990-1dd2de9bf3-0-43279335e34cd071aea12be81d63b7a2d76fefe19723f5f1ae4aa039858dee2d', introduction: '本科学历，2015年毕业于陕西中医药大学临床医学专业，于2015年至2025年在旬邑县妇计中心内儿科工作，曾于宝鸡市妇幼保健院进修学习儿童生长发育相关知识，并于2022年取得儿科主治医师职称。' },
 ]
 
 // 生成未来7天的号源
@@ -156,11 +152,11 @@ export const visitingGuide = {
 export const hospitalInfo = {
   name: '旬邑县城关镇卫生院',
   image: 'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/hospital-intro_589e337a.png?sign=1790850198-8a97c7100c-0-0009f0d9899e5c36ee07b22336e7a9b1baf5b7593ca0dffb297344f3183ebd3f',
-  summary: '旬邑县城关镇卫生院，位于县阳光大道、幽风庭韵小区西侧，是县委、县政府立足于满足县城东区居民看病就医需求，在幽风庭韵小区临街门面房基础上改建而成，项目于2024年8月开工建设、2024年12月建成完工，总建筑面积2185平方米，共分为三层，一层为门诊、中西医药房和预防接种区，二层为检验科和住院病房，三层为康复训练大厅、中医科及办公区，是一家集医疗、预防、保健为一体的公立医疗机构。\n\n医院现有干部职工18人，其中卫生专业技术人员17人、中高级以上职称14人；开设全科门诊、中医门诊、预防接种门诊、中医馆、康复训练中心、公共卫生科、药剂科、功能科等8个科室。开设床位18张，拥有B超机、心电图机、全自动生化分析仪、血细胞分析仪、中医超声治疗仪、红外线治疗仪、平衡训练、牵引治疗等检查检验及康复治疗设备46台；同时，医院门诊大厅设立便民窗口，配置轮椅、担架、热水器、茶杯等便民设施，供给有需要的患者随时取用。\n\n医院以"基础医疗+中医康复"为特色，以中西医常见病的诊断与治疗为基础，可以开展针灸、推拿、拔罐、刮痧、按摩牵引、熏蒸、中医正骨手法复位、小针刀等10类25项中医药适宜技术，为广大患者提供优质、高效、便捷的中医特色诊疗服务。',
-  serviceScope: '全科门诊、中医门诊、预防接种门诊、中医馆、康复训练中心、公共卫生科、药剂科、功能科等8个科室。提供基本医疗、预防保健、中医康复、预防接种、慢性病管理等服务。',
-  phone: '029-34411120',
+  summary: '旬邑县城关镇卫生院新院区，位于县阳光大道、豳风庭韵小区西侧，是县委、县政府立足于满足县城东区居民看病就医需求，在豳风庭韵小区临街门面房基础上改建而成，项目于2024年8月开工建设、2024年12月建成完工，总建筑面积2185平方米，共分为三层，一层为门诊、中西医药房和预防接种区，二层为检验科和住院病房，三层为康复训练大厅、中医科及办公区，是一家集医疗、预防、保健为一体的公立医疗机构。\n\n医院现有干部职工22人，其中卫生专业技术人员21人、中高级以上职称14人；开设全科门诊、中医门诊、中医馆、康复训练中心、公共卫生科、药剂科、功能科等8个科室。开设床位18张，拥有B超机、心电图机、全自动生化分析仪、血细胞分析仪、中医超声治疗仪、红外线治疗仪、平衡训练、牵引治疗等检查检验及康复治疗设备46台；同时，医院门诊大厅设立便民窗口，配置轮椅、担架、热水器、茶杯等便民设施，供给有需要的患者随时取用。\n\n医院以"基础医疗+中医康复"为特色，以中西医常见病的诊断与治疗为基础，可以开展针灸、推拿、拔罐、刮痧、按摩牵引、熏蒸、中医正骨手法复位、小针刀等10类25项中医药适宜技术，为广大患者提供优质、高效、便捷的中医特色诊疗服务。',
+  serviceScope: '全科门诊、中医门诊、中医馆、康复训练中心、公共卫生科、药剂科、功能科等8个科室。提供基本医疗、预防保健、中医康复、预防接种、慢性病管理等服务。',
+  phone: '029-37111120',
   emergencyPhone: '120',
-  address: '旬邑县阳光大道幽风庭韵小区西侧',
+  address: '陕西省咸阳市旬邑县城关街道阳光大道崔家河文化广场西北侧',
 }
 
 // 预约相关工具函数
