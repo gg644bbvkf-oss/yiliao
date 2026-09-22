@@ -542,7 +542,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
               </View>
               <Text className={labelCls}>简介</Text>
               <View className={inputWrap}>
-                <Textarea style={{ width: '100%', minHeight: 60 }} value={docIntro} onInput={(e) => setDocIntro(e.detail.value)} placeholder="医生简介" />
+                <Textarea style={{ width: '100%', minHeight: 60 }} maxlength={-1} value={docIntro} onInput={(e) => setDocIntro(e.detail.value)} placeholder="医生简介（不限字数）" />
               </View>
               <Text className={labelCls}>照片</Text>
               <View className="mb-2 flex items-center gap-3">
