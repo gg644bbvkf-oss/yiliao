@@ -150,7 +150,7 @@ const BookingFormPage = () => {
         Taro.showModal({
           title: offline ? '网页版暂不支持在线预约' : '预约失败',
           content: offline
-            ? '网页版暂不支持在线提交预约，请拨打咨询电话 0910-1234567890 或到院挂号，也可在微信小程序中预约。'
+            ? '网页版暂不支持在线提交预约，请拨打咨询电话 029-37111120 或到院挂号，也可在微信小程序中预约。'
             : body?.msg || '请稍后重试',
           showCancel: false,
           confirmText: '我知道了',
@@ -160,7 +160,7 @@ const BookingFormPage = () => {
       console.error('预约失败:', err)
       Taro.showModal({
         title: '网页版暂不支持在线预约',
-        content: '网络不可用，请拨打咨询电话 0910-1234567890 或到院挂号，也可在微信小程序中预约。',
+        content: '网络不可用，请拨打咨询电话 029-37111120 或到院挂号，也可在微信小程序中预约。',
         showCancel: false,
         confirmText: '我知道了',
       })
