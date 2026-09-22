@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import SupportFooter from '@/components/support-footer'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
 import { ChevronRight } from 'lucide-react-taro'
@@ -85,6 +86,7 @@ const DepartmentDetailPage = () => {
           <Text className="text-lg text-white font-semibold block">预约本科室</Text>
         </Button>
       </View>
+      <SupportFooter />
     </ScrollView>
   )
 }

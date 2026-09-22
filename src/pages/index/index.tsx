@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, Image } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
+import SupportFooter from '@/components/support-footer'
 import {
   Building2,
   Users,
@@ -247,6 +248,7 @@ const IndexPage = () => {
 
       {/* 底部间距 */}
       <View className="h-6" />
+      <SupportFooter withTabBar />
     </ScrollView>
   )
 }

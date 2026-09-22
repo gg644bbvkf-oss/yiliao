@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import SupportFooter from '@/components/support-footer'
 import { View, Text, ScrollView, Image } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
 import { User, Calendar, Clock, ChevronRight } from 'lucide-react-taro'
@@ -196,6 +197,7 @@ const DoctorSelectPage = () => {
           </Button>
         </View>
       )}
+      <SupportFooter />
     </ScrollView>
   )
 }

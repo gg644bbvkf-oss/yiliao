@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import SupportFooter from '@/components/support-footer'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
 import { CircleCheck, Calendar, Clock, MapPin, User, FileText } from 'lucide-react-taro'
@@ -189,6 +190,7 @@ const BookingResultPage = () => {
           <Text className="text-base text-teal-600 font-semibold block">返回首页</Text>
         </Button>
       </View>
+      <SupportFooter />
     </ScrollView>
   )
 }

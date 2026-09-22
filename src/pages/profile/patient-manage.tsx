@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import SupportFooter from '@/components/support-footer'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { Plus, User, Phone, CreditCard, Trash2 } from 'lucide-react-taro'
@@ -265,6 +266,7 @@ const PatientManagePage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <SupportFooter />
     </ScrollView>
   )
 }

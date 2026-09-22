@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import SupportFooter from '@/components/support-footer'
 import { View, Text, ScrollView, Image } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
 import { Card, CardContent } from '@/components/ui/card'
@@ -88,6 +89,7 @@ const DoctorDetailPage = () => {
           <Text className="text-lg text-white font-semibold block">预约挂号</Text>
         </Button>
       </View>
+      <SupportFooter />
     </ScrollView>
   )
 }

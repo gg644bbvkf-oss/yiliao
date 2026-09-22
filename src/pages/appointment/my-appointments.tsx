@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import SupportFooter from '@/components/support-footer'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { Calendar, Clock, MapPin, User } from 'lucide-react-taro'
@@ -183,6 +184,7 @@ const MyAppointmentsPage = () => {
           })}
         </View>
       </View>
+      <SupportFooter />
     </ScrollView>
   )
 }

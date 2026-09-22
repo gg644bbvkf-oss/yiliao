@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import SupportFooter from '@/components/support-footer'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import {
@@ -404,6 +405,7 @@ const ProfilePage = () => {
           </View>
         </View>
       )}
+      <SupportFooter withTabBar />
     </ScrollView>
   )
 }

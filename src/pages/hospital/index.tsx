@@ -1,4 +1,5 @@
 import { View, Text, ScrollView, Image } from '@tarojs/components'
+import SupportFooter from '@/components/support-footer'
 import { useDidShow } from '@tarojs/taro'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -75,6 +76,7 @@ const HospitalPage = () => {
           </View>
         )}
       </View>
+      <SupportFooter withTabBar />
     </ScrollView>
   )
 }

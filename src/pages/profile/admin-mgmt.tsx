@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import SupportFooter from '@/components/support-footer'
 import { LockKeyhole, Download } from 'lucide-react-taro'
 import type { Department } from '@/data/mock-data'
 import { cn } from '@/lib/utils'
@@ -667,6 +668,7 @@ export default function AdminMgmt() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <SupportFooter />
     </View>
   )
 }

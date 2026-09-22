@@ -1,4 +1,5 @@
 import { View, Text, ScrollView } from '@tarojs/components'
+import SupportFooter from '@/components/support-footer'
 import Taro, { useDidShow } from '@tarojs/taro'
 import {
   Stethoscope,
@@ -91,6 +92,7 @@ const IndexPage = () => {
           </View>
         )}
       </View>
+      <SupportFooter withTabBar />
     </ScrollView>
   )
 }
