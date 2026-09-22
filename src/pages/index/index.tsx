@@ -128,11 +128,11 @@ const IndexPage = () => {
 
       {/* 滚动内容（医院新闻 / 健康知识） */}
       <View className="px-4 mt-4">
-        <Card className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <CardContent className="p-3">
-            <View className="flex flex-row items-center gap-2 mb-2">
-              <Megaphone size={16} color="#0D9488" />
-              <Text className="text-sm font-bold text-slate-700 block">医院公告</Text>
+        <Card className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <CardContent className="px-6 py-5">
+            <View className="flex flex-row items-center gap-2 mb-3">
+              <Megaphone size={20} color="#0D9488" />
+              <Text className="text-base font-bold text-slate-800 block">医院公告</Text>
             </View>
             <ScrollView scrollX className="w-full whitespace-nowrap">
               <View className="flex flex-row items-center gap-8 py-1">
