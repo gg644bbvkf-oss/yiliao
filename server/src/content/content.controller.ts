@@ -105,6 +105,30 @@ export class ContentController {
     return { code: 200, data: await this.service.deleteDoctor(id) };
   }
 
+  /* ---------- 滚动内容（滚动新闻 / 健康知识） ---------- */
+  @Get('rolling-news')
+  async listRollingNews() {
+    return { code: 200, data: await this.service.getRollingNews() };
+  }
+
+  @Post('admin/rolling-news')
+  async createRollingNews(@Headers() h: Record<string, string>, @Body() body: any) {
+    await this.checkAdmin(h);
+    return { code: 200, data: await this.service.createRollingNews(body) };
+  }
+
+  @Put('admin/rolling-news/:id')
+  async updateRollingNews(@Headers() h: Record<string, string>, @Param('id') id: string, @Body() body: any) {
+    await this.checkAdmin(h);
+    return { code: 200, data: await this.service.updateRollingNews(id, body) };
+  }
+
+  @Delete('admin/rolling-news/:id')
+  async deleteRollingNews(@Headers() h: Record<string, string>, @Param('id') id: string) {
+    await this.checkAdmin(h);
+    return { code: 200, data: await this.service.deleteRollingNews(id) };
+  }
+
   /* ---------- 医生照片上传 ---------- */
   @Post('admin/upload')
   @UseInterceptors(FileInterceptor('file'))

@@ -35,6 +35,11 @@ interface DoctorItem {
   avatar?: string
   departmentId?: string
 }
+interface RollItem {
+  id: string
+  content: string
+  sortOrder?: number
+}
 
 async function unwrap(p: Promise<any>): Promise<any> {
   const res: any = await p
@@ -85,7 +90,7 @@ const labelCls = 'block mb-1 text-sm text-gray-500'
 const inputWrap = 'mb-3 rounded-xl bg-gray-50 px-3 py-2'
 
 export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } = {}) {
-  const [tab, setTab] = useState<'hospital' | 'doctor' | 'dept'>('hospital')
+  const [tab, setTab] = useState<'hospital' | 'doctor' | 'dept' | 'news'>('hospital')
 
   // 医院内容
   const [intro, setIntro] = useState('')
@@ -113,6 +118,11 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
   const [uploading, setUploading] = useState(false)
   const [msg, setMsg] = useState('')
 
+  // 滚动内容
+  const [rolls, setRolls] = useState<RollItem[]>([])
+  const [rollContent, setRollContent] = useState('')
+  const [editingRollId, setEditingRollId] = useState<string | null>(null)
+
   useEffect(() => {
     // 挂载时先校验本地登录凭证是否仍有效，失效则直接回登录页
     ;(async () => {
@@ -138,10 +148,11 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
   }, [])
 
   async function refreshAll() {
-    const [h, d, dc] = await Promise.all([
+    const [h, d, dc, r] = await Promise.all([
       unwrap(Network.request({ url: '/api/content/hospital' })),
       unwrap(Network.request({ url: '/api/content/departments' })),
       unwrap(Network.request({ url: '/api/content/doctors' })),
+      unwrap(Network.request({ url: '/api/content/rolling-news' })),
     ])
     const hc = h?.data || {}
     setIntro(hc.intro || '')
@@ -151,6 +162,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
     setHospImage(hc.image || '')
     setDeps(Array.isArray(d?.data) ? d.data : [])
     setDoctors(Array.isArray(dc?.data) ? dc.data : [])
+    setRolls(Array.isArray(r?.data) ? r.data : [])
   }
 
   function flash(s: string) {
@@ -393,6 +405,85 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
     }, '医生已删除')
   }
 
+  function addRoll() {
+    const c = rollContent.trim()
+    if (!c) return
+    setRolls((prev) => [...prev, { id: '__new__', content: c }])
+    setRollContent('')
+  }
+
+  function beginEditRoll(r: RollItem) {
+    setEditingRollId(r.id)
+    setRollContent(r.content)
+  }
+
+  function cancelEditRoll() {
+    setEditingRollId(null)
+    setRollContent('')
+  }
+
+  async function saveBat() {
+    await runWrite(async () => {
+      // 新增（无 id 或有 __new__ 占位）的内容先写入
+      for (const r of rolls) {
+        if (r.id === '__new__' || !r.id) {
+          await unwrap(
+            Network.request({
+              url: '/api/content/admin/rolling-news',
+              method: 'POST',
+              header: adminHeaders(),
+              data: { content: r.content },
+            }),
+          )
+        } else if (!r.content.trim()) {
+          // 内容为空视为删除
+          await unwrap(
+            Network.request({
+              url: `/api/content/admin/rolling-news/${r.id}`,
+              method: 'DELETE',
+              header: adminHeaders(),
+            }),
+          )
+        } else {
+          await unwrap(
+            Network.request({
+              url: `/api/content/admin/rolling-news/${r.id}`,
+              method: 'PUT',
+              header: adminHeaders(),
+              data: { content: r.content },
+            }),
+          )
+        }
+      }
+    }, '滚动内容已保存')
+    setEditingRollId(null)
+    setRollContent('')
+  }
+
+  async function delRollItem(r: RollItem) {
+    if (!r.id || r.id === '__new__') {
+      setRolls((prev) => prev.filter((x) => x !== r))
+      return
+    }
+    await runWrite(async () => {
+      await unwrap(
+        Network.request({
+          url: `/api/content/admin/rolling-news/${r.id}`,
+          method: 'DELETE',
+          header: adminHeaders(),
+        }),
+      )
+    }, '该条已删除')
+    setEditingRollId(null)
+    setRollContent('')
+  }
+
+  function saveEditedRoll(id: string) {
+    setRolls((prev) => prev.map((x) => (x.id === id ? { ...x, content: rollContent.trim() } : x)))
+    setEditingRollId(null)
+    setRollContent('')
+  }
+
   return (
     <View className="p-3">
       {msg ? (
@@ -407,6 +498,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
             ['hospital', '医院内容'],
             ['doctor', '医生管理'],
             ['dept', '科室管理'],
+            ['news', '滚动内容管理'],
           ] as const
         ).map(([k, t]) => (
           <View
@@ -586,7 +678,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
                 </View>
                 <Text className="mt-1 block text-sm text-gray-500">{d.introduction}</Text>
               </View>
-              <View className="flex flex-col gap-1.5">
+              <View className="flex flex-col gap-2">
                 <Button size="sm" variant="outline" onClick={() => editDoctor(d)}>
                   <Text>编辑</Text>
                 </Button>
@@ -596,6 +688,87 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
               </View>
             </View>
           ))}
+        </View>
+      )}
+
+      {tab === 'news' && (
+        <View>
+          {B('新增滚动内容', (
+            <View className="mt-2">
+              <Text className={labelCls}>公告 / 新闻 / 健康知识内容</Text>
+              <View className={inputWrap}>
+                <Textarea
+                  style={{ width: '100%', minHeight: 64 }}
+                  maxlength={-1}
+                  value={rollContent}
+                  onInput={(e) => setRollContent(e.detail.value)}
+                  placeholder="如：【健康知识】冬季流感高发，请注意防寒保暖…"
+                />
+              </View>
+              <View className="flex gap-2">
+                <Button size="sm" className="flex-1" onClick={addRoll}>
+                  <Text>加入列表</Text>
+                </Button>
+                {editingRollId ? (
+                  <Button size="sm" variant="outline" onClick={() => editingRollId && saveEditedRoll(editingRollId)}>
+                    <Text>应用到当前项</Text>
+                  </Button>
+                ) : null}
+              </View>
+            </View>
+          ))}
+
+          {B('滚动内容列表（可在首页滚动展示）', (
+            <View className="mt-2">
+              <Text className="block text-sm text-gray-500 mb-2">
+                提示：在下方编辑内容并点击「保存全部」，界面底部即可展示；内容为空将自动删除。
+              </Text>
+              {rolls.length === 0 ? (
+                <Text className="block text-center text-slate-400 py-4">暂无滚动内容，请先在上方添加</Text>
+              ) : (
+                rolls.map((r, idx) => (
+                  <View key={r.id === '__new__' ? `new-${idx}` : r.id} className="mb-2 rounded-lg border border-gray-100 bg-white p-3">
+                    {editingRollId === r.id ? (
+                      <View>
+                        <View className={inputWrap}>
+                          <Textarea
+                            style={{ width: '100%', minHeight: 56 }}
+                            value={rollContent}
+                            onInput={(e) => setRollContent(e.detail.value)}
+                            placeholder="编辑内容"
+                          />
+                        </View>
+                        <View className="flex items-center gap-2">
+                          <Button size="sm" onClick={() => saveEditedRoll(r.id)}>
+                            <Text>保存</Text>
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={cancelEditRoll}>
+                            <Text>取消</Text>
+                          </Button>
+                        </View>
+                      </View>
+                    ) : (
+                      <View className="flex flex-row items-start gap-2">
+                        <Text className="flex-1 text-sm text-gray-700 leading-relaxed block">{r.content}</Text>
+                        <View className="flex flex-col gap-2">
+                          <Button size="sm" variant="outline" onClick={() => beginEditRoll(r)}>
+                            <Text>编辑</Text>
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => delRollItem(r)}>
+                            <Text>删除</Text>
+                          </Button>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                ))
+              )}
+            </View>
+          ))}
+
+          <Button size="sm" className="w-full mt-1" onClick={saveBat}>
+            <Text>保存全部滚动内容</Text>
+          </Button>
         </View>
       )}
     </View>

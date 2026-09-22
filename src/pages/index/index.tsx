@@ -3,23 +3,31 @@ import Taro, { useDidShow } from '@tarojs/taro'
 import {
   Building2,
   Users,
-  Award,
   HeartPulse,
   Phone,
   MapPin,
   ChevronRight,
   ArrowRight,
+  Megaphone,
 } from 'lucide-react-taro'
 import { Card, CardContent } from '@/components/ui/card'
-import { fetchHospital, FALLBACK_HOSPITAL } from '@/services/content'
+import {
+  fetchHospital,
+  fetchRollingNews,
+  FALLBACK_HOSPITAL,
+  FALLBACK_ROLLING,
+  type RollingNewsItem,
+} from '@/services/content'
 import { useState } from 'react'
 import './index.css'
 
 const IndexPage = () => {
   const [hospital, setHospital] = useState(FALLBACK_HOSPITAL)
+  const [rolling, setRolling] = useState<RollingNewsItem[]>(FALLBACK_ROLLING)
 
   useDidShow(() => {
     loadHospital()
+    loadRolling()
   })
 
   const loadHospital = async () => {
@@ -27,7 +35,10 @@ const IndexPage = () => {
     setHospital(data)
   }
 
-  const statsIcons = [Building2, Users, Award, HeartPulse]
+  const loadRolling = async () => {
+    const list = await fetchRollingNews()
+    setRolling(list)
+  }
 
   const handleGoAppointment = () => {
     Taro.switchTab({ url: '/pages/appointment/index' })
@@ -115,20 +126,27 @@ const IndexPage = () => {
         </View>
       </View>
 
-      {/* 数据统计 */}
+      {/* 滚动内容（医院新闻 / 健康知识） */}
       <View className="px-4 mt-4">
-        <Card className="bg-white rounded-xl shadow-sm">
-          <CardContent className="p-4 flex flex-row">
-            {hospital.stats.slice(0, 4).map((stat, idx) => {
-              const IconComp = statsIcons[idx] || HeartPulse
-              return (
-                <View key={stat.label} className="flex-1 flex flex-col items-center gap-1">
-                  <IconComp size={20} color="#0D9488" />
-                  <Text className="text-lg font-bold text-teal-600 block">{stat.value}</Text>
-                  <Text className="text-xs text-slate-500 block">{stat.label}</Text>
-                </View>
-              )
-            })}
+        <Card className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <CardContent className="p-3">
+            <View className="flex flex-row items-center gap-2 mb-2">
+              <Megaphone size={16} color="#0D9488" />
+              <Text className="text-sm font-bold text-slate-700 block">医院公告</Text>
+            </View>
+            <ScrollView scrollX className="w-full whitespace-nowrap">
+              <View className="flex flex-row items-center gap-8 py-1">
+                {/* 内容重复拼接两遍，形成无缝循环滚动（可随手指滑动） */}
+                {Array.from({ length: 2 })
+                  .flatMap(() => rolling)
+                  .map((item, idx) => (
+                    <View key={`${item.id}-${idx}`} className="flex flex-row items-center shrink-0">
+                      <View className="w-2 h-2 rounded-full bg-teal-500 mr-2" />
+                      <Text className="text-sm text-slate-600">{item.content}</Text>
+                    </View>
+                  ))}
+              </View>
+            </ScrollView>
           </CardContent>
         </Card>
       </View>

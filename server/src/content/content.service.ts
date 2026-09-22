@@ -171,6 +171,55 @@ export class ContentService {
     return { deleted: true };
   }
 
+  /* ---------- 滚动内容（滚动新闻 / 健康知识）增删改 ---------- */
+  async getRollingNews() {
+    const { data, error } = await this.client
+      .from('rolling_news')
+      .select('id, content, sort_order')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
+    if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
+    return (data || []).map((r: DbRow) => ({
+      id: r.id,
+      content: r.content || '',
+      sortOrder: Number(r.sort_order) || 0,
+    }));
+  }
+
+  async createRollingNews(body: any): Promise<any> {
+    if (!body?.content || !String(body.content).trim()) {
+      throw new HttpException('滚动内容不能为空', HttpStatus.BAD_REQUEST);
+    }
+    const { data, error } = await this.client
+      .from('rolling_news')
+      .insert({
+        content: String(body.content).trim(),
+        sort_order: Number(body.sortOrder) || 99,
+      })
+      .select()
+      .single();
+    if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
+    return data;
+  }
+
+  async updateRollingNews(id: string, body: any): Promise<any> {
+    const patch: any = {};
+    if (body.content !== undefined) {
+      if (!String(body.content).trim()) throw new HttpException('滚动内容不能为空', HttpStatus.BAD_REQUEST);
+      patch.content = String(body.content).trim();
+    }
+    if (body.sortOrder !== undefined) patch.sort_order = Number(body.sortOrder);
+    const { data, error } = await this.client.from('rolling_news').update(patch).eq('id', id).select().single();
+    if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
+    return data;
+  }
+
+  async deleteRollingNews(id: string) {
+    const { error } = await this.client.from('rolling_news').delete().eq('id', id);
+    if (error) throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);
+    return { deleted: true };
+  }
+
   /* ---------- 图片上传（存对象存储，返回 URL） ---------- */
   async uploadImage(file: any): Promise<string> {
     const buffer = file.buffer || file.path;
