@@ -61,8 +61,8 @@ export const FALLBACK_HOSPITAL: HospitalContent = {
   stats: FALLBACK_STATS,
   phone: '0910-1234567890',
   address: '陕西省咸阳市旬邑县阳光大道（豳风庭韵小区西侧）城关镇卫生院',
-  lng: 108.44750016914499,
-  lat: 35.15505317002463,
+  lng: 108.359737,
+  lat: 35.129209,
   logo:
     'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/hospital-logo-1789980647828_fe47daa1.jpg?sign=1792572648-18e442492a-0-d97811916de71e301cfa2c0fea8e2f4065993b5aa06948b8bf6dca82495b7de6',
 }
