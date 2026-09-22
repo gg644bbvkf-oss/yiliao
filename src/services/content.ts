@@ -68,8 +68,8 @@ export const FALLBACK_HOSPITAL: HospitalContent = {
 }
 
 export const FALLBACK_DEPARTMENTS: DepartmentItem[] = [
-  { id: 'dept-quanke', name: '全科', description: '全科常见病、多发病首诊与基本医疗服务', icon: 'Stethoscope', location: '一楼全科门诊' },
   { id: 'dept-zhongyi', name: '中医', description: '运用针灸、推拿、拔罐、正骨等中医药适宜技术，治疗颈肩腰腿痛及慢性病调理。', icon: 'Flower2', location: '三楼中医馆' },
+  { id: 'dept-quanke', name: '全科', description: '全科常见病、多发病首诊与基本医疗服务', icon: 'Stethoscope', location: '一楼全科门诊' },
   { id: 'dept-zhuyuan', name: '住院', description: '承担住院患者的综合诊疗与康复观察，提供常规疾病住院治疗、术后康复、慢病住院管理等服务。', icon: 'BedDouble', location: '住院楼' },
   { id: 'dept-neike', name: '内科', description: '内科为医院重点科室，开展心血管、呼吸、消化、神经等系统常见病的诊治，配备经验丰富的内科医师团队，为居民提供规范、专业的诊疗服务。', icon: 'HeartPulse', location: '门诊二楼' },
   { id: 'dept-erke', name: '儿科', description: '儿科常见病诊治、儿童生长发育评估与健康指导', icon: 'Stethoscope', location: '一楼儿科门诊' },
@@ -190,13 +190,24 @@ export const fetchDepartments = async (): Promise<DepartmentItem[]> => {
     if (!isApiOk(res)) return FALLBACK_DEPARTMENTS
     const list = res.data?.data
     if (!Array.isArray(list) || list.length === 0) return FALLBACK_DEPARTMENTS
-    return list.map((d: any) => ({
+    const mapped: DepartmentItem[] = list.map((d: any) => ({
       id: d.id,
       name: d.name || '',
       description: d.description || '',
       icon: d.icon || 'Stethoscope',
       location: d.location || '',
     }))
+    // 固定科室展示顺序：中医在前、全科在后
+    const order = ['中医', '全科']
+    mapped.sort((a, b) => {
+      const ia = order.indexOf(a.name)
+      const ib = order.indexOf(b.name)
+      if (ia !== -1 && ib !== -1) return ia - ib
+      if (ia !== -1) return -1
+      if (ib !== -1) return 1
+      return 0
+    })
+    return mapped
   } catch {
     return FALLBACK_DEPARTMENTS
   }
