@@ -17,9 +17,9 @@ export default function SupportFooter({ withTabBar = false }: { withTabBar?: boo
         <Image
           src={CM_LOGO}
           mode="aspectFit"
-          style={{ width: 22, height: 22, marginRight: 6 }}
+          style={{ width: 28, height: 28, marginRight: 8 }}
         />
-        <Text className="block text-xs text-slate-400">本小程序由旬邑移动提供技术支持</Text>
+        <Text className="block text-sm text-slate-400">本小程序由旬邑移动公司制作并提供技术支持</Text>
       </View>
     </View>
   )
