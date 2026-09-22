@@ -1,1 +1,15 @@
 /* index page styles */
+
+/* 医院公告：纵向无缝自动滚动（内容在 JSX 中重复两份，平移 -50% 形成无缝循环） */
+@keyframes roll-vertical {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+.roll-vertical {
+  animation: roll-vertical linear infinite;
+  will-change: transform;
+}
