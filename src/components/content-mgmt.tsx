@@ -749,7 +749,7 @@ export default function ContentMgmt({ onAuthFail }: { onAuthFail?: () => void } 
                       </View>
                     ) : (
                       <View className="flex flex-row items-start gap-2">
-                        <Text className="flex-1 text-sm text-gray-700 leading-relaxed block">{r.content}</Text>
+                        <Text className="flex-1 text-sm text-gray-700 leading-relaxed block whitespace-pre-line">{r.content}</Text>
                         <View className="flex flex-col gap-2">
                           <Button size="sm" variant="outline" onClick={() => beginEditRoll(r)}>
                             <Text>编辑</Text>

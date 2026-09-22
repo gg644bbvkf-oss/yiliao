@@ -18,17 +18,28 @@ import {
   FALLBACK_ROLLING,
   type RollingNewsItem,
 } from '@/services/content'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './index.css'
 
 const IndexPage = () => {
   const [hospital, setHospital] = useState(FALLBACK_HOSPITAL)
   const [rolling, setRolling] = useState<RollingNewsItem[]>(FALLBACK_ROLLING)
+  const [activeRollIdx, setActiveRollIdx] = useState(0)
 
   useDidShow(() => {
     loadHospital()
     loadRolling()
   })
+
+  // 公告纵向自动滚动：每隔一秒滚动到下一行（无内容则不滚动）
+  useEffect(() => {
+    if (rolling.length === 0) return
+    setActiveRollIdx(0)
+    const timer = setInterval(() => {
+      setActiveRollIdx((prev) => (prev + 1) % rolling.length)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [rolling.length])
 
   const loadHospital = async () => {
     const data = await fetchHospital()
@@ -126,7 +137,7 @@ const IndexPage = () => {
         </View>
       </View>
 
-      {/* 滚动内容（医院新闻 / 健康知识） */}
+      {/* 滚动内容（医院新闻 / 健康知识）：纵向，自动换行，每隔一秒滚动一条 */}
       <View className="px-4 mt-4">
         <Card className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <CardContent className="px-6 py-5">
@@ -134,17 +145,26 @@ const IndexPage = () => {
               <Megaphone size={20} color="#0D9488" />
               <Text className="text-base font-bold text-slate-800 block">医院公告</Text>
             </View>
-            <ScrollView scrollX className="w-full whitespace-nowrap">
-              <View className="flex flex-row items-center gap-8 py-1">
-                {/* 内容重复拼接两遍，形成无缝循环滚动（可随手指滑动） */}
-                {Array.from({ length: 2 })
-                  .flatMap(() => rolling)
-                  .map((item, idx) => (
-                    <View key={`${item.id}-${idx}`} className="flex flex-row items-center shrink-0">
-                      <View className="w-2 h-2 rounded-full bg-teal-500 mr-2" />
-                      <Text className="text-sm text-slate-600">{item.content}</Text>
+            <ScrollView
+              scrollY
+              scrollIntoView={`roll-${activeRollIdx}`}
+              className="w-full h-20"
+            >
+              <View className="flex flex-col">
+                {rolling.map((item, i) => (
+                  <View
+                    key={item.id}
+                    id={`roll-${i}`}
+                    className="flex flex-row items-center whitespace-pre-line h-20"
+                  >
+                    <View className="w-2 h-2 rounded-full bg-teal-500 mr-2 shrink-0" />
+                    <View className="flex-1">
+                      <Text className="block text-sm text-slate-600 leading-relaxed">
+                        {item.content}
+                      </Text>
                     </View>
-                  ))}
+                  </View>
+                ))}
               </View>
             </ScrollView>
           </CardContent>
