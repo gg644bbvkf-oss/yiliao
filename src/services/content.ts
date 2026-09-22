@@ -57,7 +57,7 @@ export const FALLBACK_HOSPITAL: HospitalContent = {
   service:
     '主要开展全科常见病多发病诊治、中医诊疗与康复、住院治疗、预防接种、儿童保健、健康教育等。',
   image:
-    'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-1790045591155_1fff0ab4.jpg?sign=1792637591-39abe92217-0-db9fc3625d7006a6aa2bebfe9a1284089054afcaf3593d5c439eb716fe44f826',
+    'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-1790048960049_2a607448.jpg?sign=1792640960-0205dfdfc6-0-183c0a8d2f0281d206812c073a8fea712794e339cc0c1c04e0c991a1ead10e62',
   stats: FALLBACK_STATS,
   phone: '0910-1234567890',
   address: '陕西省咸阳市旬邑县阳光大道（豳风庭韵小区西侧）城关镇卫生院',
