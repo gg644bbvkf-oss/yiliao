@@ -50,8 +50,8 @@ export const quotaSettings = pgTable(
     departmentId: varchar("department_id", { length: 36 }).notNull(),
     departmentName: varchar("department_name", { length: 64 }).notNull(),
     date: varchar("date", { length: 32 }).notNull(),
-    morningQuota: integer("morning_quota").notNull().default(20),
-    afternoonQuota: integer("afternoon_quota").notNull().default(15),
+    morningQuota: integer("morning_quota").notNull().default(10),
+    afternoonQuota: integer("afternoon_quota").notNull().default(5),
     isHoliday: boolean("is_holiday").notNull().default(false),
   },
   (table) => [

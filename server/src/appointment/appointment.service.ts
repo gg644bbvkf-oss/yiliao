@@ -18,8 +18,8 @@ export interface Appointment {
   createdAt: string;
 }
 
-const DEFAULT_MORNING_QUOTA = 20;
-const DEFAULT_AFTERNOON_QUOTA = 15;
+const DEFAULT_MORNING_QUOTA = 10;
+const DEFAULT_AFTERNOON_QUOTA = 5;
 /** 全院统一号源标识：不区分科室，所有科室共用一份全院号源 */
 const GLOBAL_DEPT_ID = 'GLOBAL';
 
