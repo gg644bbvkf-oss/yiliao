@@ -18,7 +18,7 @@ import {
   FALLBACK_ROLLING,
   type RollingNewsItem,
 } from '@/services/content'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './index.css'
 
 const IndexPage = () => {
@@ -38,7 +38,20 @@ const IndexPage = () => {
   const loadRolling = async () => {
     const list = await fetchRollingNews()
     setRolling(list)
+    if (list.length > 0) setActiveRollIdx(0)
   }
+
+  // 逐条滚动：每 6 秒滚动到下一条，保证每条完整展示
+  const [activeRollIdx, setActiveRollIdx] = useState(0)
+
+  // 逐条滚动定时器：每 6 秒滚动到下一条（完整展示）
+  useEffect(() => {
+    if (rolling.length === 0) return
+    const timer = setInterval(() => {
+      setActiveRollIdx((idx) => (idx + 1) % rolling.length)
+    }, 6000)
+    return () => clearInterval(timer)
+  }, [rolling.length])
 
   const handleGoAppointment = () => {
     Taro.switchTab({ url: '/pages/appointment/index' })
@@ -126,7 +139,7 @@ const IndexPage = () => {
         </View>
       </View>
 
-      {/* 滚动内容（医院新闻 / 健康知识）：纵向无缝自动滚动（CSS 动画，无需拖拽） */}
+      {/* 滚动内容（医院新闻 / 健康知识）：逐条完整展示，条间空一行，每6秒自动滚动到下一行 */}
       <View className="px-4 mt-4">
         <Card className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <CardContent className="px-6 py-5">
@@ -134,30 +147,29 @@ const IndexPage = () => {
               <Megaphone size={20} color="#0D9488" />
               <Text className="text-base font-bold text-slate-800 block">医院公告</Text>
             </View>
-            <View className="w-full overflow-hidden" style={{ height: '108px' }}>
-              <View
-                className="flex flex-col"
-                style={{
-                  animation: 'roll-vertical linear infinite',
-                  animationDuration: rolling.length > 0 ? `${rolling.length * 6}s` : '0s',
-                }}
+            <View className="w-full rounded-xl overflow-hidden" style={{ height: '150px' }}>
+              <ScrollView
+                scrollY
+                scrollWithAnimation
+                scrollIntoView={`roll-${activeRollIdx}`}
+                style={{ height: '150px' }}
               >
-                {/* 内容重复两份：平移 -50% 形成无缝循环 */}
-                {Array.from({ length: 2 })
-                  .flatMap(() => rolling)
-                  .map((item, idx) => (
+                <View className="flex flex-col">
+                  {rolling.map((item, idx) => (
                     <View
-                      key={`${item.id}-${idx}`}
-                      className="flex flex-row items-start overflow-hidden"
-                      style={{ height: '108px' }}
+                      key={item.id}
+                      id={`roll-${idx}`}
+                      className="flex flex-row items-start"
+                      style={{ padding: '14px 2px 24px' }}
                     >
                       <View className="w-2 h-2 rounded-full bg-teal-500 mr-3 shrink-0 mt-2" />
-                      <View className="flex-1 overflow-hidden">
+                      <View className="flex-1">
                         <Text
                           className="block leading-relaxed"
                           style={{
                             fontSize: item.fontSize ? `${item.fontSize}px` : '14px',
                             color: item.color || '#374151',
+                            wordBreak: 'break-all',
                           }}
                         >
                           {item.content}
@@ -165,7 +177,8 @@ const IndexPage = () => {
                       </View>
                     </View>
                   ))}
-              </View>
+                </View>
+              </ScrollView>
             </View>
           </CardContent>
         </Card>
