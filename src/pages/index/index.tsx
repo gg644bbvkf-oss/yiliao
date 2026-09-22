@@ -18,7 +18,7 @@ import {
   FALLBACK_ROLLING,
   type RollingNewsItem,
 } from '@/services/content'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import './index.css'
 
 const IndexPage = () => {
@@ -38,20 +38,7 @@ const IndexPage = () => {
   const loadRolling = async () => {
     const list = await fetchRollingNews()
     setRolling(list)
-    if (list.length > 0) setActiveRollIdx(0)
   }
-
-  // 逐条滚动：每 6 秒滚动到下一条，保证每条完整展示
-  const [activeRollIdx, setActiveRollIdx] = useState(0)
-
-  // 逐条滚动定时器：每 6 秒滚动到下一条（完整展示）
-  useEffect(() => {
-    if (rolling.length === 0) return
-    const timer = setInterval(() => {
-      setActiveRollIdx((idx) => (idx + 1) % rolling.length)
-    }, 6000)
-    return () => clearInterval(timer)
-  }, [rolling.length])
 
   const handleGoAppointment = () => {
     Taro.switchTab({ url: '/pages/appointment/index' })
@@ -147,38 +134,36 @@ const IndexPage = () => {
               <Megaphone size={20} color="#0D9488" />
               <Text className="text-base font-bold text-slate-800 block">医院公告</Text>
             </View>
+            {/* 医院公告：连续匀速无缝自动向上滚动（内容重复两份，translateY -50% 无缝循环） */}
             <View className="w-full rounded-xl overflow-hidden" style={{ height: '150px' }}>
-              <ScrollView
-                scrollY
-                scrollWithAnimation
-                scrollIntoView={`roll-${activeRollIdx}`}
-                style={{ height: '150px' }}
+              <View
+                className="roll-vertical"
+                style={{
+                  animationDuration: `${rolling.length * 6}s`,
+                }}
               >
-                <View className="flex flex-col">
-                  {rolling.map((item, idx) => (
-                    <View
-                      key={item.id}
-                      id={`roll-${idx}`}
-                      className="flex flex-row items-start"
-                      style={{ padding: '14px 2px 24px' }}
-                    >
-                      <View className="w-2 h-2 rounded-full bg-teal-500 mr-3 shrink-0 mt-2" />
-                      <View className="flex-1">
-                        <Text
-                          className="block leading-relaxed"
-                          style={{
-                            fontSize: item.fontSize ? `${item.fontSize}px` : '14px',
-                            color: item.color || '#374151',
-                            wordBreak: 'break-all',
-                          }}
-                        >
-                          {item.content}
-                        </Text>
-                      </View>
+                {[...rolling, ...rolling].map((item, idx) => (
+                  <View
+                    key={`${item.id}-${idx}`}
+                    className="flex flex-row items-start"
+                    style={{ padding: '14px 2px 12px' }}
+                  >
+                    <View className="w-2 h-2 rounded-full bg-teal-500 mr-3 shrink-0 mt-2" />
+                    <View className="flex-1">
+                      <Text
+                        className="block leading-relaxed"
+                        style={{
+                          fontSize: item.fontSize ? `${item.fontSize}px` : '14px',
+                          color: item.color || '#374151',
+                          wordBreak: 'break-all',
+                        }}
+                      >
+                        {item.content}
+                      </Text>
                     </View>
-                  ))}
-                </View>
-              </ScrollView>
+                  </View>
+                ))}
+              </View>
             </View>
           </CardContent>
         </Card>
