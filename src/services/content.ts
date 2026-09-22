@@ -60,11 +60,11 @@ export const FALLBACK_HOSPITAL: HospitalContent = {
     'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/doctor-1788926766466_99cc6d50.jpg?sign=1791518766-47b2eddc7a-0-8cafe0807acbd94ef327c02ed93ee63eeb925083f9aa405b65eb8791cf70438c',
   stats: FALLBACK_STATS,
   phone: '0910-1234567890',
-  address: '旬邑县阳光大道幽风庭韵小区西侧',
+  address: '陕西省咸阳市旬邑县阳光大道（豳风庭韵小区西侧）城关镇卫生院',
+  lng: 108.341,
+  lat: 35.1105,
   logo:
     'https://coze-coding-project.tos.coze.site/coze_storage_7680476130855649315/hospital-logo-1789980647828_fe47daa1.jpg?sign=1792572648-18e442492a-0-d97811916de71e301cfa2c0fea8e2f4065993b5aa06948b8bf6dca82495b7de6',
-  lng: 108.338,
-  lat: 35.112,
 }
 
 export const FALLBACK_DEPARTMENTS: DepartmentItem[] = [
