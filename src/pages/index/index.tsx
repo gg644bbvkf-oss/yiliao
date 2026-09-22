@@ -146,7 +146,7 @@ const IndexPage = () => {
                   <View
                     key={`${item.id}-${idx}`}
                     className="flex flex-row items-start"
-                    style={{ padding: '14px 2px 12px' }}
+                    style={{ padding: '14px 2px 6px' }}
                   >
                     <View className="w-2 h-2 rounded-full bg-teal-500 mr-3 shrink-0 mt-2" />
                     <View className="flex-1">
