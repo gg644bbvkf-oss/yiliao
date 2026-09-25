@@ -118,7 +118,7 @@ const IndexPage = () => {
           onClick={handleGoAppointment}
         >
           <View className="flex-1">
-            <Text className="block text-2xl font-extrabold text-white">在线预约挂号</Text>
+            <Text className="block text-2xl font-extrabold text-white">在线预约</Text>
             <Text className="block text-base text-orange-100 mt-2">全科 · 中医 · 住院，免排队，便捷就诊</Text>
           </View>
           <View className="w-12 h-12 rounded-full bg-white flex items-center justify-center flex-shrink-0 ml-3">

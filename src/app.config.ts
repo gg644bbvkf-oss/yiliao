@@ -40,7 +40,7 @@ export default typeof defineAppConfig === 'function'
         },
         {
           pagePath: 'pages/appointment/index',
-          text: '预约挂号',
+          text: '在线预约',
           iconPath: './assets/tabbar/calendar-plus.png',
           selectedIconPath: './assets/tabbar/calendar-plus-active.png',
         },
@@ -94,7 +94,7 @@ export default typeof defineAppConfig === 'function'
         },
         {
           pagePath: 'pages/appointment/index',
-          text: '预约挂号',
+          text: '在线预约',
           iconPath: './assets/tabbar/calendar-plus.png',
           selectedIconPath: './assets/tabbar/calendar-plus-active.png',
         },

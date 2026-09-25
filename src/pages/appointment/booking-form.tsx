@@ -234,7 +234,7 @@ const BookingFormPage = () => {
               {slot.holidayName ? `${slot.holidayName} · ` : ''}节假日停诊
             </Text>
             <Text className="block text-sm text-red-400 text-center w-full mt-1">
-              当日不开放预约挂号，请选择其他日期或电话咨询
+              当日不开放在线预约，请选择其他日期或电话咨询
             </Text>
           </View>
         ) : (

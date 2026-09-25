@@ -86,7 +86,7 @@ const DoctorDetailPage = () => {
           className="w-full h-12 bg-teal-600 text-white text-lg font-semibold rounded-xl"
           onClick={handleBook}
         >
-          <Text className="text-lg text-white font-semibold block">预约挂号</Text>
+          <Text className="text-lg text-white font-semibold block">在线预约</Text>
         </Button>
       </View>
       <SupportFooter />

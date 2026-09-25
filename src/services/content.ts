@@ -151,7 +151,7 @@ export const FALLBACK_QUOTA: QuotaData = {
 
 // 滚动内容兜底（滚动新闻 / 健康知识）
 export const FALLBACK_ROLLING: RollingNewsItem[] = [
-  { id: 'roll-1', content: '【温馨提示】我院网上预约挂号均不收取任何费用，请勿轻信"卖号代排"行为，如遇请拨 029-37111120 举报。', fontSize: '14', color: '#374151' },
+  { id: 'roll-1', content: '【温馨提示】我院网上在线预约均不收取任何费用，请勿轻信"卖号代排"行为，如遇请拨 029-37111120 举报。', fontSize: '14', color: '#374151' },
   { id: 'roll-2', content: '【门诊安排】中医门诊坐诊时间：周一至周五 8:30-12:00（节假日除外），请合理安排就诊时间。', fontSize: '14', color: '#374151' },
   { id: 'roll-3', content: '【健康知识】冬季流感高发，注意勤洗手、多通风、接种疫苗，出现发热请及时就医。', fontSize: '14', color: '#374151' },
 ]

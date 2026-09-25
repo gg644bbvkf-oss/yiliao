@@ -284,7 +284,7 @@ const ProfilePage = () => {
           onClick={() => Taro.switchTab({ url: '/pages/appointment/index' })}
         >
           <CalendarClock size={18} color="#0D9488" />
-          <Text className="text-base text-teal-600 font-semibold block">预约挂号</Text>
+          <Text className="text-base text-teal-600 font-semibold block">在线预约</Text>
         </Button>
       </View>
 

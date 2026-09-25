@@ -108,7 +108,7 @@ const MyAppointmentsPage = () => {
           className="mt-6 bg-teal-600 text-white rounded-xl h-11 px-8"
           onClick={() => Taro.switchTab({ url: '/pages/appointment/index' })}
         >
-          <Text className="text-base text-white block">去预约挂号</Text>
+          <Text className="text-base text-white block">去在线预约</Text>
         </Button>
       </View>
     )
