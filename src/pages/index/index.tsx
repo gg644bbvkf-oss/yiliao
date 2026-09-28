@@ -112,7 +112,7 @@ const IndexPage = () => {
       <View className="px-4 mt-4">
         <Card className="bg-white rounded-xl shadow-sm overflow-hidden">
           {hospital.image ? (
-            <Image className="w-full h-48" src={hospital.image} mode="aspectFill" />
+            <Image className="w-full" src={hospital.image} mode="widthFix" />
           ) : (
             <View className="w-full h-48 bg-gradient-to-r from-teal-500 to-emerald-400 flex items-center justify-center">
               <Text className="block text-lg text-white font-semibold">旬邑县城关镇卫生院</Text>
