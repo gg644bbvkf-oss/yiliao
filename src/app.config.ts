@@ -11,6 +11,7 @@ export default typeof defineAppConfig === 'function'
       'pages/appointment/my-appointments',
       'pages/hospital/department-detail',
       'pages/hospital/doctor-detail',
+      'pages/hospital/health-detail',
       'pages/profile/patient-manage',
       'pages/profile/admin-mgmt',
     ],

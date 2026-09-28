@@ -49,6 +49,17 @@ const IndexPage = () => {
     Taro.switchTab({ url: '/pages/hospital/index' })
   }
 
+  // 只取内容第一行（去掉空行）
+  const getFirstLine = (content: string) => {
+    const lines = (content || '').split('\n').map((l) => l.trim()).filter(Boolean)
+    return lines[0] || ''
+  }
+
+  // 点击进入健康宣传详情页，展示完整内容
+  const handleOpenHealth = (id: string) => {
+    Taro.navigateTo({ url: `/pages/hospital/health-detail?id=${id}` })
+  }
+
   const handleCallPhone = () => {
     Taro.makePhoneCall({ phoneNumber: hospital.phone })
   }
@@ -127,16 +138,16 @@ const IndexPage = () => {
         </View>
       </View>
 
-      {/* 滚动内容（医院新闻 / 健康知识）：逐条完整展示，条间空一行，每6秒自动滚动到下一行 */}
+      {/* 健康宣传：连续匀速无缝滚动，每条只显示第一行，点击进入详情看完整内容 */}
       <View className="px-4 mt-4">
         <Card className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <CardContent className="px-6 py-5">
             <View className="flex flex-row items-center gap-2 mb-3">
               <Megaphone size={20} color="#0D9488" />
-              <Text className="text-base font-bold text-slate-800 block">医院公告</Text>
+              <Text className="text-base font-bold text-slate-800 block">健康宣传</Text>
             </View>
-            {/* 医院公告：连续匀速无缝自动向上滚动（内容重复两份，translateY -50% 无缝循环） */}
-            <View className="w-full rounded-xl overflow-hidden" style={{ height: '150px' }}>
+            {/* 健康宣传：连续匀速无缝自动向上滚动（内容重复两份，translateY -50% 无缝循环） */}
+            <View className="w-full rounded-xl overflow-hidden" style={{ height: '96px' }}>
               <View
                 className="roll-vertical"
                 style={{
@@ -146,20 +157,23 @@ const IndexPage = () => {
                 {[...rolling, ...rolling].map((item, idx) => (
                   <View
                     key={`${item.id}-${idx}`}
-                    className="flex flex-row items-start"
-                    style={{ padding: '14px 2px 6px' }}
+                    className="flex flex-row items-center"
+                    style={{ padding: '6px 2px' }}
                   >
-                    <View className="w-2 h-2 rounded-full bg-teal-500 mr-3 shrink-0 mt-2" />
-                    <View className="flex-1">
+                    <View className="w-2 h-2 rounded-full bg-teal-500 mr-3 shrink-0" />
+                    <View className="flex-1 overflow-hidden">
                       <Text
-                        className="block leading-relaxed"
+                        className="block leading-relaxed underline"
+                        onClick={() => handleOpenHealth(item.id)}
                         style={{
                           fontSize: item.fontSize ? `${item.fontSize}px` : '14px',
                           color: item.color || '#374151',
-                          wordBreak: 'break-all',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
                         }}
                       >
-                        {item.content}
+                        {getFirstLine(item.content)}
                       </Text>
                     </View>
                   </View>
