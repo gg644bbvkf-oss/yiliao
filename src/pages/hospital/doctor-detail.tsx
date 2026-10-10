@@ -6,8 +6,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { doctors } from '@/data/mock-data'
+import useShare from '@/hooks/use-share'
 
 const DoctorDetailPage = () => {
+  useShare({ title: '医生详情 · 旬邑县城关镇卫生院' })
+
   const router = useRouter()
   const doctorId = router.params.id || ''
 

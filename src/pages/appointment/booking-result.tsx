@@ -6,6 +6,7 @@ import { CircleCheck, Calendar, Clock, MapPin, User, FileText } from 'lucide-rea
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Network } from '@/network'
+import useShare from '@/hooks/use-share'
 
 interface Appointment {
   id: string
@@ -21,6 +22,8 @@ interface Appointment {
 }
 
 const BookingResultPage = () => {
+  useShare({ title: '预约成功 · 在线预约' })
+
   const router = useRouter()
   const appointmentId = router.params.id || ''
   const [appointment, setAppointment] = useState<Appointment | null>(null)

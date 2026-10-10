@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Network } from '@/network'
 import { getAppointments, getPatients, getDateDisplay } from '@/data/mock-data'
+import useShare from '@/hooks/use-share'
 
 const ADMIN_PHONE_KEY = 'hospital_admin_phone'
 const USER_PHONE_KEY = 'hospital_user_phone'
@@ -27,6 +28,8 @@ const menuItems = [
 ]
 
 const ProfilePage = () => {
+  useShare({ title: '旬邑县城关镇卫生院 · 在线预约' })
+
   const [patientCount, setPatientCount] = useState(0)
   const [appointmentCount, setAppointmentCount] = useState(0)
   const [showAdminLogin, setShowAdminLogin] = useState(false)

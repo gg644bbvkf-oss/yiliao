@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Network } from '@/network'
+import useShare from '@/hooks/use-share'
 
 interface Appointment {
   id: string
@@ -27,6 +28,8 @@ const statusMap: Record<string, { label: string; className: string }> = {
 }
 
 const MyAppointmentsPage = () => {
+  useShare({ title: '我的预约 · 在线预约' })
+
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
 

@@ -9,8 +9,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { getPatients, savePatient, deletePatient, type Patient } from '@/data/mock-data'
+import useShare from '@/hooks/use-share'
 
 const PatientManagePage = () => {
+  useShare({ title: '就诊人管理 · 在线预约' })
+
   const [patients, setPatients] = useState<Patient[]>(() => getPatients())
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null)

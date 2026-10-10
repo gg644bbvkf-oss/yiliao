@@ -5,8 +5,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { fetchDoctors, FALLBACK_DOCTORS, type DoctorItem } from '@/services/content'
 import { useState } from 'react'
+import useShare from '@/hooks/use-share'
 
 const HospitalPage = () => {
+  useShare({ title: '医生介绍 · 旬邑县城关镇卫生院' })
+
   const [doctors, setDoctors] = useState<DoctorItem[]>(FALLBACK_DOCTORS)
 
   useDidShow(() => {

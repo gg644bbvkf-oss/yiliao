@@ -13,6 +13,7 @@ import type { Department } from '@/data/mock-data'
 import { cn } from '@/lib/utils'
 import ContentMgmt from '@/components/content-mgmt'
 import { getAdmin, getAdminToken, setAdminInfo } from '@/utils/admin'
+import useShare from '@/hooks/use-share'
 
 const ADMIN_PHONE_KEY = 'hospital_admin_phone'
 
@@ -71,6 +72,8 @@ async function unwrap(p: Promise<any>) {
 }
 
 export default function AdminMgmt() {
+  useShare({ title: '旬邑县城关镇卫生院 · 在线预约' })
+
   const dates = genDates()
   const [activeTab, setActiveTab] = useState('appointments')
   const [appts, setAppts] = useState<ApptItem[]>([])

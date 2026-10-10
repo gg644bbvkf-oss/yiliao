@@ -13,6 +13,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchDepartments, FALLBACK_DEPARTMENTS, type DepartmentItem } from '@/services/content'
 import { useState } from 'react'
+import useShare from '@/hooks/use-share'
 
 const iconMap: Record<string, React.ComponentType<any>> = {
   Stethoscope,
@@ -23,6 +24,8 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 }
 
 const IndexPage = () => {
+  useShare({ title: '在线预约 · 旬邑县城关镇卫生院' })
+
   const [departments, setDepartments] = useState<DepartmentItem[]>(FALLBACK_DEPARTMENTS)
 
   useDidShow(() => {

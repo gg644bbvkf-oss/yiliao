@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Network } from '@/network'
 import { fetchQuota, FALLBACK_QUOTA } from '@/services/content'
 import { getPatients } from '@/data/mock-data'
+import useShare from '@/hooks/use-share'
 
 interface SlotData {
   morningLeft: number
@@ -34,6 +35,8 @@ const genDates = (): string[] => {
 }
 
 const BookingFormPage = () => {
+  useShare({ title: '填写预约 · 在线预约' })
+
   const router = useRouter()
   const departmentId = router.params.departmentId || ''
   const departmentName = router.params.departmentName

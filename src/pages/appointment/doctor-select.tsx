@@ -7,8 +7,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { doctors, timeSlots, departments, getDateDisplay } from '@/data/mock-data'
+import useShare from '@/hooks/use-share'
 
 const DoctorSelectPage = () => {
+  useShare({ title: '选择科室 · 在线预约' })
+
   const router = useRouter()
   const departmentId = router.params.departmentId || ''
 

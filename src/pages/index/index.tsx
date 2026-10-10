@@ -20,9 +20,12 @@ import {
   type RollingNewsItem,
 } from '@/services/content'
 import { useState } from 'react'
+import useShare from '@/hooks/use-share'
 import './index.css'
 
 const IndexPage = () => {
+  useShare({ title: '旬邑县城关镇卫生院 · 在线预约' })
+
   const [hospital, setHospital] = useState(FALLBACK_HOSPITAL)
   const [rolling, setRolling] = useState<RollingNewsItem[]>(FALLBACK_ROLLING)
 

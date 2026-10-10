@@ -4,8 +4,11 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchRollingNews, type RollingNewsItem } from '@/services/content'
+import useShare from '@/hooks/use-share'
 
 const HealthDetailPage = () => {
+  useShare({ title: '健康宣传 · 旬邑县城关镇卫生院' })
+
   const router = useRouter()
   const newsId = router.params.id || ''
   const [item, setItem] = useState<RollingNewsItem | null>(null)
